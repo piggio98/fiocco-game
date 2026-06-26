@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>FIOCCO - L'Avventura all'Uncinetto</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;}
+:root{
+  --pink:#ffb3c6;--pink2:#ff85a1;--pink3:#ff4d6d;
+  --blue:#b8e0ff;--blue2:#90c9f9;--blue3:#5aade8;
+  --green:#b8f0c8;--green2:#7de0a0;--green3:#3dbf6f;
+  --yellow:#fff3b0;--yellow2:#ffe066;--yellow3:#e6b800;
+  --orange:#ffd6a5;--orange2:#ffb347;--orange3:#e07b00;
+  --purple:#e0c3fc;--purple2:#c084fc;--purple3:#9333ea;
+  --cream:#fff8f0;--warm:#fef3e8;--bg:#fce4ec;
+  --shadow:rgba(0,0,0,0.12);--text:#5a3a2a;--text2:#8b6a5a;
+  --board-bg:#fff5ee;--cell-border:rgba(255,180,150,0.3);
+  --btn-r:28px;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--text);}
+
+/* ── SCREEN SYSTEM ─────────────────────────────────────── */
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* ── BACKGROUND DECORATIONS ────────────────────────────── */
+.bg-deco{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.bg-deco span{position:absolute;font-size:1.6rem;opacity:0.15;animation:floatDeco 8s ease-in-out infinite;}
+.bg-deco span:nth-child(1){left:5%;top:10%;animation-delay:0s;}
+.bg-deco span:nth-child(2){left:20%;top:60%;animation-delay:1.2s;}
+.bg-deco span:nth-child(3){left:75%;top:20%;animation-delay:2.4s;}
+.bg-deco span:nth-child(4){left:90%;top:70%;animation-delay:0.8s;}
+.bg-deco span:nth-child(5){left:50%;top:85%;animation-delay:3s;}
+.bg-deco span:nth-child(6){left:60%;top:5%;animation-delay:1.8s;}
+@keyframes floatDeco{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-18px) rotate(12deg);}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);}}
+.gem.shake{animation:shake 0.35s ease;}
+@keyframes gemWobble{0%{transform:rotate(-3deg) scale(1.05);}25%{transform:rotate(3deg) scale(1.08);}50%{transform:rotate(-2deg) scale(1.04);}75%{transform:rotate(2deg) scale(1.06);}100%{transform:rotate(0deg) scale(1);}}
+.gem.wobbling{animation:gemWobble 0.5s ease-in-out;}
+
+/* ── LOADING ────────────────────────────────────────────── */
+#screen-loading{justify-content:center;background:linear-gradient(160deg,#fce4ec,#f3e5f5,#e8f5e9);}
+.loading-rabbit{font-size:5rem;animation:rabbitBounce 0.7s ease-in-out infinite;}
+@keyframes rabbitBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}
+}
+.loading-title{font-size:2rem;font-weight:900;color:var(--pink3);margin:12px 0 4px;letter-spacing:1px;text-shadow:0 2px 8px rgba(255,100,130,0.3);}
+.loading-subtitle{font-size:0.95rem;color:var(--text2);margin-bottom:28px;}
+.loading-bar-wrap{width:220px;height:14px;background:rgba(255,255,255,0.6);border-radius:10px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.1);}
+.loading-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pink2),var(--purple2));border-radius:10px;transition:width 0.1s;}
+.loading-text{font-size:0.8rem;color:var(--text2);margin-top:10px;}
+
+/* ── INTRO STORY ────────────────────────────────────────── */
+#screen-intro{justify-content:flex-end;background:linear-gradient(160deg,#fce4ec,#f3e5f5);}
+.intro-slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;animation:slideFadeIn 0.5s ease;}
+.intro-slide.active{display:flex;}
+@keyframes slideFadeIn{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+.intro-art{font-size:5rem;margin-bottom:16px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));}
+.intro-title{font-size:1.5rem;font-weight:900;color:var(--pink3);text-align:center;margin-bottom:10px;}
+.intro-text{font-size:0.95rem;color:var(--text);text-align:center;line-height:1.7;max-width:320px;background:rgba(255,255,255,0.7);padding:14px 18px;border-radius:18px;box-shadow:0 4px 16px var(--shadow);}
+.intro-nav{position:absolute;bottom:30px;display:flex;gap:12px;align-items:center;}
+.intro-dots{display:flex;gap:8px;}
+.intro-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,100,130,0.3);transition:all 0.3s;}
+.intro-dot.active{background:var(--pink3);transform:scale(1.3);}
+.btn-intro-next{background:linear-gradient(135deg,var(--pink2),var(--pink3));color:white;border:none;padding:12px 28px;border-radius:var(--btn-r);font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(255,100,130,0.4);transition:transform 0.1s;}
+.btn-intro-next:active{transform:scale(0.94);}
+.btn-skip{position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.7);border:none;padding:8px 16px;border-radius:20px;font-size:0.8rem;color:var(--text2);cursor:pointer;}
+
+/* ── MAIN MENU ──────────────────────────────────────────── */
+#screen-menu{justify-content:center;background:linear-gradient(160deg,#fce4ec 0%,#f8e8ff 50%,#e8f5e9 100%);}
+.menu-logo-wrap{text-align:center;margin-bottom:24px;position:relative;z-index:1;}
+.menu-rabbit{font-size:4.5rem;animation:rabbitBounce 1s ease-in-out infinite;}
+.menu-title{font-size:2.2rem;font-weight:900;color:var(--pink3);letter-spacing:1px;line-height:1.1;text-shadow:0 3px 10px rgba(255,100,130,0.25);}
+.menu-sub{font-size:0.85rem;color:var(--text2);margin-top:2px;font-style:italic;}
+.menu-btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:280px;position:relative;z-index:1;}
+.btn-menu{border:none;padding:16px;border-radius:var(--btn-r);font-size:1.05rem;font-weight:700;cursor:pointer;transition:transform 0.1s,box-shadow 0.1s;display:flex;align-items:center;gap:10px;justify-content:center;}
+.btn-menu:active{transform:scale(0.95);}
+.btn-play{background:linear-gradient(135deg,#ff85a1,#ff4d6d);color:white;box-shadow:0 6px 20px rgba(255,77,109,0.4);}
+.btn-shop{background:linear-gradient(135deg,#ffe066,#ffb347);color:#7a4000;box-shadow:0 6px 20px rgba(255,180,50,0.35);}
+.btn-settings{background:rgba(255,255,255,0.8);color:var(--text);box-shadow:0 4px 14px var(--shadow);}
+.menu-lives{position:absolute;top:env(safe-area-inset-top, 16px);right:16px;display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.85);padding:7px 12px;border-radius:20px;box-shadow:0 2px 8px var(--shadow);font-size:0.9rem;font-weight:700;color:var(--pink3);z-index:10;}
+
+/* ── WORLD MAP ──────────────────────────────────────────── */
+#screen-worldmap{background:linear-gradient(180deg,#fce4ec,#e8f5e9,#e3f2fd,#fff3e0,#f3e5f5);}
+.worldmap-header{position:relative;z-index:10;width:100%;padding:env(safe-area-inset-top,16px) 16px 12px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);box-shadow:0 2px 10px var(--shadow);}
+.btn-back{background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px;}
+.worldmap-title{font-size:1.1rem;font-weight:800;color:var(--pink3);flex:1;}
+.worldmap-lives{display:flex;align-items:center;gap:4px;font-weight:700;color:var(--pink3);font-size:0.9rem;}
+.worldmap-scroll{flex:1;overflow-y:auto;overflow-x:hidden;width:100%;-webkit-overflow-scrolling:touch;padding-bottom:20px;}
+.worldmap-scroll::-webkit-scrollbar{display:none;}
+
+.world-section{width:100%;padding:0 16px 8px;}
+.world-banner{display:flex;align-items:center;gap:10px;padding:14px 16px;margin:16px 0 12px;border-radius:20px;font-weight:900;font-size:1rem;}
+.world-1-banner{background:linear-gradient(135deg,#fce4ec,#f8bbd9);color:#c2185b;}
+.world-2-banner{background:linear-gradient(135deg,#fff9c4,#fff176);color:#f57f17;}
+.world-3-banner{background:linear-gradient(135deg,#e8f5e9,#a5d6a7);color:#2e7d32;}
+.world-4-banner{background:linear-gradient(135deg,#e3f2fd,#90caf9);color:#1565c0;}
+.world-5-banner{background:linear-gradient(135deg,#f3e5f5,#ce93d8);color:#6a1b9a;}
+.world-banner-icon{font-size:1.5rem;}
+.world-banner-text{flex:1;}
+.world-banner-name{font-size:1rem;font-weight:900;}
+.world-banner-desc{font-size:0.75rem;font-weight:500;opacity:0.75;}
+
+.levels-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:0 4px;}
+.level-node{aspect-ratio:1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;cursor:pointer;transition:transform 0.15s;position:relative;box-shadow:0 3px 10px var(--shadow);border:3px solid rgba(255,255,255,0.6);}
+.level-node:active{transform:scale(0.9);}
+.level-node.unlocked{background:linear-gradient(135deg,#ff85a1,#ff4d6d);color:white;}
+.level-node.unlocked.completed-1{background:linear-gradient(135deg,#c8e6c9,#66bb6a);}
+.level-node.unlocked.completed-2{background:linear-gradient(135deg,#fff9c4,#ffee58);}
+.level-node.unlocked.completed-3{background:linear-gradient(135deg,#ffe0b2,#ffa726);}
+.level-node.current-level{background:linear-gradient(135deg,#ff85a1,#ff4d6d);color:white;animation:pulseCurrent 1.5s ease-in-out infinite;box-shadow:0 0 0 4px rgba(255,77,109,0.3),0 4px 14px rgba(255,77,109,0.4);}
+@keyframes pulseCurrent{0%,100%{box-shadow:0 0 0 4px rgba(255,77,109,0.3),0 4px 14px rgba(255,77,109,0.4);}50%{box-shadow:0 0 0 8px rgba(255,77,109,0.15),0 4px 14px rgba(255,77,109,0.5);}}
+.level-node.locked{background:rgba(200,180,180,0.4);color:rgba(150,120,120,0.6);cursor:default;}
+.level-stars{font-size:0.55rem;letter-spacing:-1px;margin-top:1px;}
+.level-lock{font-size:0.9rem;}
+
+/* ── LEVEL INFO POPUP ───────────────────────────────────── */
+#screen-levelinfo{background:rgba(0,0,0,0.5);justify-content:flex-end;}
+.levelinfo-card{background:var(--cream);width:100%;max-width:420px;border-radius:28px 28px 0 0;padding:24px;box-shadow:0 -8px 30px rgba(0,0,0,0.15);animation:slideUp 0.35s ease;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.levelinfo-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.levelinfo-num{font-size:2rem;font-weight:900;color:var(--pink3);}
+.levelinfo-world{font-size:0.85rem;color:var(--text2);}
+.levelinfo-name{font-size:1rem;font-weight:700;color:var(--text);}
+.levelinfo-objective{background:linear-gradient(135deg,var(--pink),var(--purple));padding:12px 16px;border-radius:16px;margin:12px 0;font-size:0.9rem;font-weight:600;color:var(--text);}
+.levelinfo-stats{display:flex;gap:12px;margin-bottom:20px;}
+.levelinfo-stat{flex:1;background:rgba(255,255,255,0.8);padding:10px;border-radius:14px;text-align:center;box-shadow:0 2px 6px var(--shadow);}
+.levelinfo-stat-val{font-size:1.3rem;font-weight:900;color:var(--pink3);}
+.levelinfo-stat-lbl{font-size:0.7rem;color:var(--text2);margin-top:2px;}
+.btn-play-level{width:100%;background:linear-gradient(135deg,var(--pink2),var(--pink3));color:white;border:none;padding:16px;border-radius:var(--btn-r);font-size:1.1rem;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(255,77,109,0.4);}
+.btn-play-level:active{transform:scale(0.96);}
+
+/* ── GAME SCREEN ────────────────────────────────────────── */
+#screen-game{background:linear-gradient(160deg,#fce4ec,#f3e5f5);}
+.game-header{width:100%;padding:env(safe-area-inset-top,12px) 12px 8px;display:flex;align-items:center;gap:8px;flex-shrink:0;position:relative;z-index:10;}
+.btn-pause{background:rgba(255,255,255,0.8);border:none;width:40px;height:40px;border-radius:50%;font-size:1.1rem;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px var(--shadow);}
+.game-score-box{flex:1;background:rgba(255,255,255,0.85);border-radius:16px;padding:6px 12px;text-align:center;box-shadow:0 2px 8px var(--shadow);}
+.game-score-lbl{font-size:0.65rem;color:var(--text2);font-weight:600;}
+.game-score-val{font-size:1.3rem;font-weight:900;color:var(--pink3);line-height:1.1;}
+.game-moves-box{background:rgba(255,255,255,0.85);border-radius:16px;padding:6px 12px;text-align:center;min-width:56px;box-shadow:0 2px 8px var(--shadow);}
+.game-moves-val{font-size:1.3rem;font-weight:900;color:var(--text);}
+.game-moves-lbl{font-size:0.65rem;color:var(--text2);font-weight:600;}
+
+.game-objectives{width:100%;padding:0 12px 6px;display:flex;gap:6px;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.game-objectives::-webkit-scrollbar{display:none;}
+.obj-chip{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.85);padding:5px 10px;border-radius:20px;font-size:0.78rem;font-weight:700;color:var(--text);box-shadow:0 2px 6px var(--shadow);white-space:nowrap;flex-shrink:0;}
+.obj-chip.done{background:linear-gradient(135deg,#c8e6c9,#a5d6a7);color:#1b5e20;}
+.obj-progress{width:60px;height:5px;background:rgba(0,0,0,0.1);border-radius:3px;overflow:hidden;}
+.obj-progress-fill{height:100%;background:linear-gradient(90deg,var(--pink2),var(--pink3));border-radius:3px;transition:width 0.3s;}
+
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;padding:4px 8px;position:relative;}
+#board{position:relative;border-radius:20px;background:var(--board-bg);box-shadow:0 8px 30px rgba(0,0,0,0.12),inset 0 2px 8px rgba(255,200,200,0.3);overflow:hidden;}
+#board::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent calc(12.5% - 1px),var(--cell-border) calc(12.5% - 1px),var(--cell-border) 12.5%),repeating-linear-gradient(90deg,transparent,transparent calc(12.5% - 1px),var(--cell-border) calc(12.5% - 1px),var(--cell-border) 12.5%);pointer-events:none;z-index:5;}
+
+/* ── GEMS ───────────────────────────────────────────────── */
+.gem{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;will-change:transform,top,left;overflow:hidden;transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1);box-shadow:inset 0 3px 8px rgba(255,255,255,0.4),inset 0 -3px 8px rgba(0,0,0,0.1),0 4px 12px rgba(0,0,0,0.22);}
+/* Fili intrecciati (pattern lana) — nascosti per gem con sprite */
+.gem::before{content:'';position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(from 0deg,transparent 0deg 7deg,rgba(255,255,255,0.13) 7deg 8deg,transparent 8deg 15deg,rgba(255,255,255,0.07) 15deg 16deg);pointer-events:none;z-index:1;}
+/* Luce riflessa */
+.gem::after{content:'';position:absolute;top:13%;left:15%;width:35%;height:24%;background:rgba(255,255,255,0.6);border-radius:50%;transform:rotate(-35deg);pointer-events:none;z-index:3;}
+/* Gem con sprite: nasconde pattern CSS */
+.gem-sprite::before,.gem-sprite::after{display:none!important;}
+.gem-sprite .gem-sym{display:none!important;}
+/* Simbolo centrale */
+.gem-sym{position:relative;z-index:2;font-size:0.5em;color:rgba(255,255,255,0.88);text-shadow:0 1px 4px rgba(0,0,0,0.55);pointer-events:none;line-height:1;font-weight:900;}
+
+.gem.selected{transform:scale(1.2);z-index:4;box-shadow:0 0 0 4px white,0 0 0 7px rgba(255,255,255,0.4),0 6px 18px rgba(0,0,0,0.28);}
+.gem.matched{animation:matchPop 0.25s forwards;}
+.gem.hint{animation:hintPulse 0.65s ease-in-out 2;}
+@keyframes matchPop{0%{transform:scale(1);opacity:1;}40%{transform:scale(1.3) rotate(15deg);opacity:0.9;}100%{transform:scale(0) rotate(30deg);opacity:0;}}
+@keyframes spawnGem{from{transform:scale(0) rotate(-180deg);opacity:0;}to{transform:scale(1) rotate(0deg);opacity:1;}}
+@keyframes hintPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.16);box-shadow:0 0 0 6px rgba(255,255,255,0.8),0 4px 16px rgba(255,200,100,0.5);}}
+
+/* Colori per tipo */
+.gem-1{background:radial-gradient(circle at 38% 30%,#ffd6e0,#ff4d6d);}
+.gem-2{background:radial-gradient(circle at 38% 30%,#c8e8ff,#3a9eea);}
+.gem-3{background:radial-gradient(circle at 38% 30%,#c8f4d4,#2ecc71);}
+.gem-4{background:radial-gradient(circle at 38% 30%,#fff5b0,#e6b800);}
+.gem-5{background:radial-gradient(circle at 38% 30%,#e8d0ff,#9333ea);}
+.gem-6{background:radial-gradient(circle at 38% 30%,#ffd8a8,#e07b00);}
+
+/* ── SPECIAL GEMS ─── */
+/* Striped: barra luminosa orizzontale/verticale */
+.gem-stripe-bar{position:absolute;background:rgba(255,255,255,0.8);border-radius:4px;z-index:5;box-shadow:0 0 10px rgba(255,255,255,1);animation:stripePulse 0.85s ease-in-out infinite;}
+.gem.special-stripe-h .gem-stripe-bar{left:4%;right:4%;height:24%;top:38%;}
+.gem.special-stripe-v .gem-stripe-bar{top:4%;bottom:4%;width:24%;left:38%;}
+@keyframes stripePulse{0%,100%{opacity:0.75;}50%{opacity:1;box-shadow:0 0 16px rgba(255,255,255,1);}}
+
+/* Bomb: pulsante con stella */
+.gem.special-bomb{animation:bombPulse 1.1s ease-in-out infinite;}
+.gem-bomb-star{position:absolute;font-size:1.1em;z-index:5;animation:bombSpin 1.8s linear infinite;filter:drop-shadow(0 0 5px rgba(255,240,80,1));}
+@keyframes bombPulse{0%,100%{box-shadow:inset 0 3px 8px rgba(255,255,255,0.4),0 0 0 3px rgba(255,230,0,0.7),0 4px 14px rgba(0,0,0,0.25);}50%{box-shadow:inset 0 3px 8px rgba(255,255,255,0.4),0 0 0 7px rgba(255,230,0,0.3),0 4px 22px rgba(255,200,0,0.5);}}
+@keyframes bombSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+/* Rainbow: arcobaleno rotante */
+.gem.special-rainbow{background:conic-gradient(from 0deg,#ff4d6d,#ff8c00,#f0b800,#2ecc71,#3a9eea,#9333ea,#ff4d6d);animation:rainbowSpin 1.1s linear infinite;box-shadow:0 0 0 3px rgba(255,255,255,0.8),0 4px 20px rgba(150,80,255,0.6)!important;}
+@keyframes rainbowSpin{from{filter:hue-rotate(0deg);}to{filter:hue-rotate(360deg);}}
+.gem-rainbow-crown{position:absolute;top:-2px;font-size:0.65em;z-index:5;animation:crownFloat 1s ease-in-out infinite;}
+@keyframes crownFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+
+/* ── ICE BLOCKS - blocchi solidi di ghiaccio, non sfere ── */
+.gem.blocker-ice{
+  background:linear-gradient(145deg,#f0faff 0%,#c8e8ff 25%,#e8f6ff 55%,#9fd8fa 100%);
+  border-radius:14px!important; /* blocco, non sfera */
+  border:2px solid rgba(180,230,255,0.98);
+  box-shadow:
+    inset 0 3px 10px rgba(255,255,255,0.95),
+    inset 0 -2px 6px rgba(100,180,240,0.4),
+    inset 3px 0 8px rgba(255,255,255,0.5),
+    0 4px 14px rgba(60,160,255,0.5);
+  overflow:visible;
+}
+/* Pattern cristallo ghiaccio (sovrascrive il pattern lana) */
+.gem.blocker-ice::before{
+  background:
+    linear-gradient(60deg,transparent 44%,rgba(255,255,255,0.6) 50%,transparent 56%),
+    linear-gradient(-60deg,transparent 44%,rgba(255,255,255,0.4) 50%,transparent 56%),
+    linear-gradient(0deg,transparent 44%,rgba(200,230,255,0.4) 50%,transparent 56%)!important;
+}
+.gem.blocker-ice::after{
+  background:rgba(255,255,255,0.85)!important;
+  width:40%;height:28%;top:10%;left:12%;
+}
+/* Simbolo ghiaccio */
+.gem-ice-sym{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1em;z-index:4;animation:iceShimmer 2.5s ease-in-out infinite;filter:drop-shadow(0 0 4px rgba(0,160,255,0.7));}
+@keyframes iceShimmer{0%,100%{opacity:0.8;transform:scale(1);}50%{opacity:1;transform:scale(1.08);filter:drop-shadow(0 0 8px rgba(100,220,255,0.9));}}
+/* Versione incrinata (hp=1) */
+.gem.blocker-ice.ice-cracked{background:linear-gradient(135deg,#c0d8f0,#90c0e8,#d0ebff)!important;}
+.gem.blocker-ice.ice-cracked::before{
+  background:
+    linear-gradient(30deg,transparent 40%,rgba(255,255,255,0.3) 42%,transparent 44%),
+    linear-gradient(-40deg,transparent 38%,rgba(255,255,255,0.3) 40%,transparent 42%),
+    linear-gradient(70deg,transparent 35%,rgba(180,210,255,0.4) 37%,transparent 39%)!important;
+}
+.gem.blocker-ice.ice-cracked .gem-ice-sym{filter:drop-shadow(0 0 4px rgba(0,100,200,0.8));opacity:0.9;}
+
+/* ── STONE ── */
+.gem.blocker-stone{background:radial-gradient(circle at 38% 30%,#c8c8c8,#555)!important;border:2px solid rgba(0,0,0,0.3);box-shadow:inset 0 2px 6px rgba(255,255,255,0.2),0 3px 8px rgba(0,0,0,0.35);}
+.gem.blocker-stone::before{background:linear-gradient(45deg,transparent 48%,rgba(255,255,255,0.12) 50%,transparent 52%),linear-gradient(-45deg,transparent 48%,rgba(255,255,255,0.12) 50%,transparent 52%)!important;}
+.gem.blocker-stone::after{background:rgba(255,255,255,0.35)!important;}
+.gem-stone-sym{position:absolute;font-size:0.9em;z-index:4;opacity:0.85;}
+
+/* ── SUPER BOMB (2x2) ── */
+.gem.special-superbomb{
+  background:conic-gradient(from 0deg,#ff4d6d,#ff8c00,#f0b800,#2ecc71,#3a9eea,#9333ea,#ff4d6d);
+  animation:superBombPulse 0.8s ease-in-out infinite;
+  box-shadow:0 0 0 4px rgba(255,255,255,0.9),0 0 0 7px rgba(255,200,0,0.4),0 6px 24px rgba(255,100,0,0.6)!important;
+}
+.gem-superbomb-icon{position:absolute;font-size:1.1em;z-index:5;animation:superBombSpin 1s linear infinite;filter:drop-shadow(0 0 6px rgba(255,255,255,1));}
+@keyframes superBombPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+@keyframes superBombSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+/* Particles */
+.particle{position:absolute;pointer-events:none;z-index:20;animation:particleFly 0.65s ease-out forwards;}
+@keyframes particleFly{from{transform:translate(0,0) scale(1);opacity:1;}to{transform:translate(var(--px),var(--py)) scale(0);opacity:0;}}
+
+/* Score popup */
+.score-popup{position:absolute;pointer-events:none;z-index:30;font-weight:900;font-size:1.2rem;color:var(--pink3);text-shadow:0 1px 4px rgba(0,0,0,0.2);animation:popUp 0.8s ease-out forwards;}
+@keyframes popUp{from{transform:translateY(0) scale(0.5);opacity:1;}to{transform:translateY(-50px) scale(1);opacity:0;}}
+.score-popup.combo{font-size:1.6rem;color:var(--purple3);}
+
+/* ── WIN SCREEN ─────────────────────────────────────────── */
+#screen-win{background:linear-gradient(160deg,#fff9c4,#fce4ec);justify-content:center;}
+.win-content{text-align:center;animation:celebrateIn 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes celebrateIn{from{transform:scale(0.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+.win-rabbit{font-size:5rem;animation:rabbitBounce 0.8s ease-in-out infinite;}
+.win-title{font-size:2.2rem;font-weight:900;color:var(--pink3);margin:10px 0 4px;}
+.win-level{font-size:0.9rem;color:var(--text2);margin-bottom:16px;}
+.win-stars{display:flex;gap:8px;justify-content:center;margin-bottom:16px;}
+.win-star{font-size:2.5rem;transform:scale(0);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+.win-star.earned{transform:scale(1);}
+.win-score{font-size:1.1rem;color:var(--text);margin-bottom:24px;}
+.win-score span{font-weight:900;color:var(--pink3);font-size:1.4rem;}
+.win-btns{display:flex;flex-direction:column;gap:10px;width:220px;}
+.btn-next-level{background:linear-gradient(135deg,var(--pink2),var(--pink3));color:white;border:none;padding:14px;border-radius:var(--btn-r);font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,77,109,0.4);}
+.btn-next-level:active{transform:scale(0.95);}
+.btn-back-map{background:rgba(255,255,255,0.8);color:var(--text);border:none;padding:12px;border-radius:var(--btn-r);font-size:0.95rem;font-weight:600;cursor:pointer;}
+
+/* ── LOSE SCREEN ────────────────────────────────────────── */
+#screen-lose{background:linear-gradient(160deg,#e8eaf6,#fce4ec);justify-content:center;}
+.lose-content{text-align:center;animation:celebrateIn 0.5s ease;}
+.lose-rabbit{font-size:4rem;animation:sadShake 1s ease-in-out infinite;}
+@keyframes sadShake{0%,100%{transform:rotate(-5deg);}50%{transform:rotate(5deg);}}
+.lose-title{font-size:1.8rem;font-weight:900;color:#9c27b0;margin:10px 0 6px;}
+.lose-text{font-size:0.9rem;color:var(--text2);margin-bottom:20px;}
+.lose-btns{display:flex;flex-direction:column;gap:10px;width:220px;}
+.btn-retry{background:linear-gradient(135deg,#ce93d8,#9c27b0);color:white;border:none;padding:14px;border-radius:var(--btn-r);font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(156,39,176,0.4);}
+.btn-retry:active{transform:scale(0.95);}
+
+/* ── SHOP ───────────────────────────────────────────────── */
+#screen-shop{background:linear-gradient(160deg,#fff9c4,#fce4ec);}
+.shop-header{width:100%;padding:env(safe-area-inset-top,16px) 16px 12px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);box-shadow:0 2px 10px var(--shadow);}
+.shop-scroll{flex:1;overflow-y:auto;width:100%;padding:16px;-webkit-overflow-scrolling:touch;}
+.shop-title-section{text-align:center;margin-bottom:20px;}
+.shop-rabbit{font-size:3rem;}
+.shop-title{font-size:1.4rem;font-weight:900;color:var(--pink3);margin-top:4px;}
+.shop-card{background:rgba(255,255,255,0.9);border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 4px 16px var(--shadow);display:flex;align-items:center;gap:14px;}
+.shop-card-icon{font-size:2.5rem;flex-shrink:0;}
+.shop-card-info{flex:1;}
+.shop-card-name{font-size:1rem;font-weight:800;color:var(--text);}
+.shop-card-desc{font-size:0.8rem;color:var(--text2);margin-top:2px;}
+.btn-buy{background:linear-gradient(135deg,#ffe066,#ffb347);color:#7a4000;border:none;padding:10px 18px;border-radius:20px;font-size:0.9rem;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(255,179,71,0.4);white-space:nowrap;}
+.btn-buy:active{transform:scale(0.94);}
+.lives-current{display:flex;align-items:center;justify-content:center;gap:8px;font-size:1.1rem;font-weight:800;color:var(--pink3);background:rgba(255,255,255,0.8);padding:10px 20px;border-radius:16px;margin-bottom:12px;}
+
+/* ── SETTINGS ───────────────────────────────────────────── */
+#screen-settings{background:linear-gradient(160deg,#fce4ec,#f3e5f5);}
+.settings-header{width:100%;padding:env(safe-area-inset-top,16px) 16px 12px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);box-shadow:0 2px 10px var(--shadow);}
+.settings-scroll{flex:1;overflow-y:auto;width:100%;padding:16px;-webkit-overflow-scrolling:touch;}
+.settings-section{background:rgba(255,255,255,0.85);border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 3px 12px var(--shadow);}
+.settings-section h3{font-size:0.9rem;font-weight:800;color:var(--pink3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.05);}
+.settings-row:last-child{border-bottom:none;}
+.settings-label{font-size:0.9rem;color:var(--text);}
+.toggle{width:48px;height:26px;background:#ddd;border-radius:13px;position:relative;cursor:pointer;transition:background 0.3s;}
+.toggle.on{background:var(--pink2);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;transition:transform 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+.toggle.on::after{transform:translateX(22px);}
+.settings-input{border:2px solid rgba(255,150,170,0.4);border-radius:10px;padding:6px 10px;font-size:0.85rem;width:180px;outline:none;background:rgba(255,255,255,0.8);color:var(--text);}
+.settings-input:focus{border-color:var(--pink2);}
+.btn-save-settings{width:100%;background:linear-gradient(135deg,var(--pink2),var(--pink3));color:white;border:none;padding:14px;border-radius:var(--btn-r);font-size:1rem;font-weight:700;cursor:pointer;margin-top:4px;box-shadow:0 4px 14px rgba(255,77,109,0.35);}
+.btn-save-settings:active{transform:scale(0.96);}
+
+/* ── PAUSE OVERLAY ──────────────────────────────────────── */
+#overlay-pause{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:100;}
+#overlay-pause.active{display:flex;}
+.pause-card{background:var(--cream);border-radius:24px;padding:28px 24px;text-align:center;width:260px;box-shadow:0 8px 30px rgba(0,0,0,0.2);}
+.pause-title{font-size:1.5rem;font-weight:900;color:var(--pink3);margin-bottom:6px;}
+.pause-sub{font-size:0.85rem;color:var(--text2);margin-bottom:20px;}
+.pause-btns{display:flex;flex-direction:column;gap:10px;}
+.btn-resume{background:linear-gradient(135deg,var(--pink2),var(--pink3));color:white;border:none;padding:13px;border-radius:var(--btn-r);font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(255,77,109,0.35);}
+.btn-quit-game{background:rgba(0,0,0,0.06);color:var(--text);border:none;padding:11px;border-radius:var(--btn-r);font-size:0.9rem;font-weight:600;cursor:pointer;}
+
+/* ── TOAST ──────────────────────────────────────────────── */
+.toast{position:fixed;bottom:env(safe-area-inset-bottom,30px);left:50%;transform:translateX(-50%) translateY(80px);background:rgba(50,30,20,0.88);color:white;padding:10px 20px;border-radius:20px;font-size:0.85rem;font-weight:600;z-index:200;transition:transform 0.35s ease,opacity 0.35s ease;opacity:0;pointer-events:none;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* ── LIVES REGEN TIMER ──────────────────────────────────── */
+.lives-timer{font-size:0.7rem;color:var(--text2);margin-left:4px;}
+
+/* ── RESPONSIVE ─────────────────────────────────────────── */
+@media(max-width:360px){.menu-title{font-size:1.8rem;}.win-title{font-size:1.8rem;}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="screen active" id="screen-loading">
+  <div class="bg-deco"><span>🧶</span><span>🐰</span><span>🌸</span><span>🧵</span><span>🌿</span><span>⭐</span></div>
+  <div class="loading-rabbit">🐰</div>
+  <div class="loading-title">FIOCCO</div>
+  <div class="loading-subtitle">L'Avventura all'Uncinetto</div>
+  <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+  <div class="loading-text" id="loading-text">Preparando i gomitoli...</div>
+</div>
+
+<!-- INTRO STORY -->
+<div class="screen" id="screen-intro">
+  <div class="bg-deco"><span>🌸</span><span>🧶</span><span>🌿</span><span>⭐</span><span>🐰</span><span>✨</span></div>
+  <button class="btn-skip" onclick="skipIntro()">Salta ›</button>
+  <div class="intro-slide active" id="slide-0">
+    <div class="intro-art">🌈🐰✨</div>
+    <div class="intro-title">Il Prato di Fiocco</div>
+    <div class="intro-text">In un prato magico viveva <strong>Fiocco</strong>, una coniglietta dalle orecchie di seta che sapeva creare meraviglie con i suoi aghi da uncinetto. Ogni suo lavoro portava gioia a tutto il bosco.</div>
+  </div>
+  <div class="intro-slide" id="slide-1">
+    <div class="intro-art">🌪️🧶💨</div>
+    <div class="intro-title">Il Vento Dispettoso</div>
+    <div class="intro-text">Un giorno il perfido <strong>Vento Burlone</strong> soffiò via tutti i magici gomitoli di lana colorata, scatternandoli nei cinque angoli del Bosco Incantato! Senza di essi, Fiocco non può tessere...</div>
+  </div>
+  <div class="intro-slide" id="slide-2">
+    <div class="intro-art">🗺️🌿🏔️</div>
+    <div class="intro-title">Il Grande Viaggio</div>
+    <div class="intro-text">Fiocco deve attraversare <strong>5 mondi meravigliosi</strong>: il Prato Fiorito, il Giardino Segreto, il Bosco dei Sogni, la Valle Stellata e la Montagna di Lana. Aiutala a ritrovare tutti i gomitoli!</div>
+  </div>
+  <div class="intro-slide" id="slide-3">
+    <div class="intro-art">🧶🎀🐰</div>
+    <div class="intro-title">Sei Pronta?</div>
+    <div class="intro-text">Unisci i <strong>gomitoli dello stesso colore</strong> per raccoglierli. Crea combinazioni speciali per fare magie! Più gomitoli unisci, più potente diventa la magia di Fiocco. Buona fortuna!</div>
+  </div>
+  <div class="intro-nav">
+    <div class="intro-dots" id="intro-dots">
+      <div class="intro-dot active"></div><div class="intro-dot"></div><div class="intro-dot"></div><div class="intro-dot"></div>
+    </div>
+    <button class="btn-intro-next" id="btn-intro-next" onclick="introNext()">Avanti →</button>
+  </div>
+</div>
+
+<!-- MAIN MENU -->
+<div class="screen" id="screen-menu">
+  <div class="bg-deco"><span>🧶</span><span>🌸</span><span>🐰</span><span>🌿</span><span>⭐</span><span>🎀</span></div>
+  <div class="menu-lives" id="menu-lives">❤️ <span id="menu-lives-count">5</span></div>
+  <div class="menu-logo-wrap">
+    <div class="menu-rabbit">🐰</div>
+    <div class="menu-title">FIOCCO</div>
+    <div class="menu-sub">L'Avventura all'Uncinetto</div>
+  </div>
+  <div class="menu-btns">
+    <button class="btn-menu btn-play" onclick="goToWorldmap()">🎮 Gioca</button>
+    <button class="btn-menu btn-shop" onclick="showScreen('shop')">🛍️ Negozio</button>
+    <button class="btn-menu btn-settings" onclick="showScreen('settings')">⚙️ Impostazioni</button>
+  </div>
+</div>
+
+<!-- WORLD MAP -->
+<div class="screen" id="screen-worldmap">
+  <div class="worldmap-header">
+    <button class="btn-back" onclick="showScreen('menu')">←</button>
+    <span class="worldmap-title">🗺️ Mappa del Bosco</span>
+    <div class="worldmap-lives">❤️ <span id="wm-lives">5</span></div>
+  </div>
+  <div class="worldmap-scroll" id="worldmap-scroll">
+    <!-- generated dynamically -->
+  </div>
+</div>
+
+<!-- LEVEL INFO -->
+<div class="screen" id="screen-levelinfo" onclick="if(event.target===this)goToWorldmap()">
+  <div class="levelinfo-card">
+    <div class="levelinfo-top">
+      <div>
+        <div class="levelinfo-num" id="li-num">Livello 1</div>
+        <div class="levelinfo-world" id="li-world">Prato Fiorito</div>
+        <div class="levelinfo-name" id="li-name">I Primi Passi</div>
+      </div>
+      <div style="font-size:2.5rem" id="li-icon">🐰</div>
+    </div>
+    <div class="levelinfo-objective" id="li-objective">🎯 Raggiungi 1000 punti</div>
+    <div class="levelinfo-stats">
+      <div class="levelinfo-stat"><div class="levelinfo-stat-val" id="li-moves">25</div><div class="levelinfo-stat-lbl">Mosse</div></div>
+      <div class="levelinfo-stat"><div class="levelinfo-stat-val" id="li-stars">⭐⭐⭐</div><div class="levelinfo-stat-lbl">Miglior punteggio</div></div>
+      <div class="levelinfo-stat"><div class="levelinfo-stat-val" id="li-best">—</div><div class="levelinfo-stat-lbl">Punti</div></div>
+    </div>
+    <button class="btn-play-level" onclick="startLevel()">🐰 Inizia Livello!</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <button class="btn-pause" onclick="togglePause()">⏸</button>
+    <div class="game-score-box">
+      <div class="game-score-lbl">PUNTI</div>
+      <div class="game-score-val" id="game-score">0</div>
+    </div>
+    <div class="game-moves-box">
+      <div class="game-moves-val" id="game-moves">25</div>
+      <div class="game-moves-lbl">MOSSE</div>
+    </div>
+  </div>
+  <div class="game-objectives" id="game-objectives"></div>
+  <div class="board-wrap">
+    <div id="board"></div>
+  </div>
+</div>
+
+<!-- WIN -->
+<div class="screen" id="screen-win">
+  <div class="bg-deco"><span>⭐</span><span>🌸</span><span>✨</span><span>🎀</span><span>🐰</span><span>💫</span></div>
+  <div class="win-content">
+    <div class="win-rabbit">🐰</div>
+    <div class="win-title">Fantastico! 🎉</div>
+    <div class="win-level" id="win-level-text">Livello 1 completato!</div>
+    <div class="win-stars" id="win-stars">
+      <span class="win-star" id="win-star-1">⭐</span>
+      <span class="win-star" id="win-star-2">⭐</span>
+      <span class="win-star" id="win-star-3">⭐</span>
+    </div>
+    <div class="win-score">Punteggio: <span id="win-score-val">0</span></div>
+    <div class="win-btns">
+      <button class="btn-next-level" onclick="nextLevel()">Livello Successivo →</button>
+      <button class="btn-back-map" onclick="goToWorldmap()">← Mappa</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOSE -->
+<div class="screen" id="screen-lose">
+  <div class="bg-deco"><span>🌧️</span><span>💧</span><span>🐰</span><span>🧶</span><span>💔</span><span>🌿</span></div>
+  <div class="lose-content">
+    <div class="lose-rabbit">😢🐰</div>
+    <div class="lose-title">Ops! Riprova!</div>
+    <div class="lose-text" id="lose-text">Non abbastanza punti questa volta...<br>Fiocco ci riprova!</div>
+    <div class="lose-btns">
+      <button class="btn-retry" onclick="retryLevel()">🔄 Riprova</button>
+      <button class="btn-back-map" onclick="goToWorldmap()" style="margin-top:0">← Mappa</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHOP -->
+<div class="screen" id="screen-shop">
+  <div class="shop-header">
+    <button class="btn-back" onclick="showScreen('menu')">←</button>
+    <span class="worldmap-title">🛍️ Negozio di Fiocco</span>
+  </div>
+  <div class="shop-scroll">
+    <div class="shop-title-section">
+      <div class="shop-rabbit">🐰🧶</div>
+      <div class="shop-title">Cosa vuoi comprare?</div>
+    </div>
+    <div class="lives-current">❤️ Vite attuali: <span id="shop-lives-count">5</span> / 5</div>
+    <div class="shop-card">
+      <div class="shop-card-icon">❤️</div>
+      <div class="shop-card-info">
+        <div class="shop-card-name">Vite Infinite!</div>
+        <div class="shop-card-desc">Ricevi subito 20 vite gratis. Fiocco è generosa! 🐰</div>
+      </div>
+      <button class="btn-buy" onclick="buyLives()">GRATIS!</button>
+    </div>
+    <div class="shop-card">
+      <div class="shop-card-icon">⚡</div>
+      <div class="shop-card-info">
+        <div class="shop-card-name">Mossa Extra</div>
+        <div class="shop-card-desc">+5 mosse per il livello attuale. (Prossimamente)</div>
+      </div>
+      <button class="btn-buy" style="opacity:0.5">Presto</button>
+    </div>
+    <div class="shop-card">
+      <div class="shop-card-icon">🌈</div>
+      <div class="shop-card-info">
+        <div class="shop-card-name">Gomitolo Arcobaleno</div>
+        <div class="shop-card-desc">Un gomitolo speciale che elimina tutto un colore. (Prossimamente)</div>
+      </div>
+      <button class="btn-buy" style="opacity:0.5">Presto</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="screen-settings">
+  <div class="settings-header">
+    <button class="btn-back" onclick="showScreen('menu')">←</button>
+    <span class="worldmap-title">⚙️ Impostazioni</span>
+  </div>
+  <div class="settings-scroll">
+    <div class="settings-section">
+      <h3>Audio</h3>
+      <div class="settings-row">
+        <span class="settings-label">Suoni</span>
+        <div class="toggle on" id="toggle-sound" onclick="toggleSetting('sound')"></div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Musica</span>
+        <div class="toggle on" id="toggle-music" onclick="toggleSetting('music')"></div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Vibrazioni</span>
+        <div class="toggle on" id="toggle-haptic" onclick="toggleSetting('haptic')"></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>Supabase (Salva progressi)</h3>
+      <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span class="settings-label" style="font-size:0.8rem;color:var(--text2);">URL Supabase</span>
+        <input class="settings-input" id="sb-url" type="text" placeholder="https://xxx.supabase.co" style="width:100%;">
+      </div>
+      <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span class="settings-label" style="font-size:0.8rem;color:var(--text2);">Anon Key</span>
+        <input class="settings-input" id="sb-key" type="text" placeholder="eyJ..." style="width:100%;">
+      </div>
+      <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span class="settings-label" style="font-size:0.8rem;color:var(--text2);">Utente ID (opzionale)</span>
+        <input class="settings-input" id="sb-user" type="text" placeholder="nome_utente" style="width:100%;">
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>Progressi</h3>
+      <div class="settings-row">
+        <span class="settings-label">Resetta tutto</span>
+        <button onclick="resetGame()" style="background:#ffcdd2;border:none;padding:8px 14px;border-radius:14px;font-size:0.85rem;color:#c62828;font-weight:700;cursor:pointer;">Reset</button>
+      </div>
+    </div>
+    <button class="btn-save-settings" onclick="saveSettings()">💾 Salva Impostazioni</button>
+  </div>
+</div>
+
+<!-- PAUSE OVERLAY -->
+<div id="overlay-pause">
+  <div class="pause-card">
+    <div class="pause-title">⏸ Pausa</div>
+    <div class="pause-sub">Prenditi un momento di riposo!</div>
+    <div class="pause-btns">
+      <button class="btn-resume" onclick="togglePause()">▶ Continua</button>
+      <button class="btn-quit-game" onclick="quitGame()">← Torna alla mappa</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  FIOCCO - L'Avventura all'Uncinetto  v1.0
+//  Match-3 game engine, Italian, mobile-optimized
+// ═══════════════════════════════════════════════════════════
+
+// ── AUDIO ENGINE ────────────────────────────────────────────
+let audioCtx = null;
+function getAudio(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  }
+  return audioCtx;
+}
+function playTone(freq,dur,type='sine',vol=0.25,delay=0){
+  if(!settings.sound) return;
+  const ctx = getAudio(); if(!ctx) return;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = type; o.frequency.setValueAtTime(freq, ctx.currentTime+delay);
+  g.gain.setValueAtTime(0,ctx.currentTime+delay);
+  g.gain.linearRampToValueAtTime(vol, ctx.currentTime+delay+0.01);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay+dur);
+  o.start(ctx.currentTime+delay);
+  o.stop(ctx.currentTime+delay+dur+0.05);
+}
+const SFX = {
+  match: ()=>{ playTone(520,0.08,'triangle',0.2); playTone(660,0.08,'triangle',0.2,0.06); },
+  match3: ()=>{ [520,660,800].forEach((f,i)=>playTone(f,0.1,'triangle',0.2,i*0.05)); },
+  match4: ()=>{ [400,600,800,1000].forEach((f,i)=>playTone(f,0.12,'sine',0.22,i*0.04)); },
+  matchRainbow: ()=>{ [300,500,700,900,1100].forEach((f,i)=>playTone(f,0.15,'sine',0.25,i*0.03)); },
+  combo: (n)=>{ const f=400+n*100; playTone(f,0.15,'sine',0.3); playTone(f*1.5,0.1,'sine',0.2,0.08); },
+  win: ()=>{ [523,659,784,1047].forEach((f,i)=>playTone(f,0.3,'sine',0.3,i*0.12)); },
+  lose: ()=>{ [400,350,300].forEach((f,i)=>playTone(f,0.25,'triangle',0.2,i*0.15)); },
+  select: ()=>playTone(600,0.06,'sine',0.12),
+  swap: ()=>{ playTone(400,0.08,'sine',0.12); playTone(520,0.08,'sine',0.12,0.04); },
+  invalid: ()=>playTone(180,0.18,'square',0.1),
+  buy: ()=>{ [800,1000,1200].forEach((f,i)=>playTone(f,0.12,'sine',0.25,i*0.06)); },
+  // Suoni speciali distinti
+  bomb: ()=>{
+    playTone(80,0.4,'sawtooth',0.35);
+    playTone(160,0.3,'square',0.25,0.05);
+    playTone(300,0.15,'triangle',0.15,0.1);
+  },
+  stripeH: ()=>{
+    playTone(300,0.08,'sine',0.2);
+    playTone(500,0.08,'sine',0.2,0.06);
+    playTone(700,0.08,'sine',0.2,0.12);
+    playTone(900,0.1,'sine',0.2,0.18);
+  },
+  stripeV: ()=>{
+    playTone(900,0.08,'sine',0.2);
+    playTone(700,0.08,'sine',0.2,0.06);
+    playTone(500,0.08,'sine',0.2,0.12);
+    playTone(300,0.1,'sine',0.2,0.18);
+  },
+  rainbow: ()=>{
+    [261,330,392,523,659,784,1047].forEach((f,i)=>playTone(f,0.18,'sine',0.22,i*0.05));
+  },
+  superbomb: ()=>{
+    playTone(60,0.5,'sawtooth',0.4);
+    playTone(120,0.4,'square',0.3,0.06);
+    playTone(240,0.3,'sawtooth',0.25,0.12);
+    playTone(800,0.2,'triangle',0.2,0.2);
+    playTone(1200,0.15,'sine',0.15,0.3);
+  },
+  iceBreak: ()=>{
+    [1200,1500,900,1800].forEach((f,i)=>playTone(f,0.08,'triangle',0.15,i*0.04));
+  },
+  iceCrack: ()=>{
+    playTone(1400,0.1,'triangle',0.12);
+    playTone(1800,0.08,'triangle',0.1,0.05);
+  },
+};
+
+// ── STATE ───────────────────────────────────────────────────
+const LIFE_REGEN_MS = 30*60*1000; // 30 min
+const MAX_LIVES = 5;
+
+const state = {
+  screen: 'loading',
+  lives: 5,
+  lastLifeRegen: Date.now(),
+  currentLevelNum: 1,
+  pendingLevelNum: null,
+  levelStars: {},   // levelNum -> 0..3
+  levelBest: {},    // levelNum -> score
+  settings: { sound:true, music:true, haptic:true },
+  supabase: { url:'', key:'', user:'' },
+};
+
+let settings = state.settings;
+
+// ── SAVE/LOAD ────────────────────────────────────────────────
+function saveState(){
+  localStorage.setItem('fiocco_v1', JSON.stringify({
+    lives: gameState.lives,
+    lastLifeRegen: gameState.lastLifeRegen,
+    currentLevelNum: gameState.currentLevelNum,
+    levelStars: gameState.levelStars,
+    levelBest: gameState.levelBest,
+  }));
+  localStorage.setItem('fiocco_settings', JSON.stringify({
+    settings: state.settings,
+    supabase: state.supabase,
+  }));
+}
+
+function loadState(){
+  const raw = localStorage.getItem('fiocco_v1');
+  if(raw){
+    const d = JSON.parse(raw);
+    gameState.lives = d.lives ?? 5;
+    gameState.lastLifeRegen = d.lastLifeRegen ?? Date.now();
+    gameState.currentLevelNum = d.currentLevelNum ?? 1;
+    gameState.levelStars = d.levelStars ?? {};
+    gameState.levelBest = d.levelBest ?? {};
+  }
+  const rawS = localStorage.getItem('fiocco_settings');
+  if(rawS){
+    const d = JSON.parse(rawS);
+    Object.assign(state.settings, d.settings||{});
+    Object.assign(state.supabase, d.supabase||{});
+    settings = state.settings;
+  }
+}
+
+// ── GAME STATE ───────────────────────────────────────────────
+const gameState = {
+  lives: 5,
+  lastLifeRegen: Date.now(),
+  currentLevelNum: 1,
+  levelStars: {},
+  levelBest: {},
+  // in-game
+  level: null,
+  board: [],      // [row][col] = {type, special, blocker, hp}
+  score: 0,
+  moves: 0,
+  combo: 0,
+  selected: null, // {row,col}
+  animating: false,
+  objectives: {}, // objective state
+  paused: false,
+};
+
+// ── LEVEL DEFINITIONS ────────────────────────────────────────
+const WORLD_NAMES = [
+  '', // index 0 unused
+  '🌸 Prato Fiorito',
+  '🌻 Giardino Segreto',
+  '🍄 Bosco dei Sogni',
+  '⭐ Valle Stellata',
+  '❄️ Montagna di Lana',
+];
+const WORLD_ICONS = ['','🌸','🌻','🍄','⭐','❄️'];
+const WORLD_DESCS = [
+  '',
+  'I primi passi di Fiocco nel suo prato',
+  'Fiori misteriosi e farfalle incantate',
+  'Funghi parlanti e magie del bosco',
+  'Stelle cadenti e sogni di lana',
+  'La sfida finale contro il Vento Burlone',
+];
+
+// Gem emoji labels for display
+const GEM_EMOJI = ['','🩷','🔵','💚','💛','💜','🧡'];
+const GEM_NAMES = ['','Rosa','Azzurro','Verde','Giallo','Viola','Arancione'];
+const GEM_SYMBOLS = ['','✿','✦','♣','★','◆','♥'];
+
+// ── SPRITE SHEET ──────────────────────────────────────────────
+// sprites.png: 1402×1122px
+// Righe 0-1: 5 gomitoli per riga, celle 280×315px
+// Riga 2: 4 speciali 280×492px + 2 blocchi ghiaccio 141×492px
+const SPRITE_W=1402, SPRITE_H=1122;
+const GEM_SPRITE_DATA={
+  1:{x:0,   y:0,   w:280,h:315}, // rosa
+  2:{x:0,   y:315, w:280,h:315}, // blu
+  3:{x:1120,y:0,   w:282,h:315}, // verde
+  4:{x:840, y:0,   w:280,h:315}, // giallo
+  5:{x:280, y:315, w:280,h:315}, // viola
+  6:{x:560, y:315, w:280,h:315}, // teal
+};
+const SPECIAL_SPRITE_DATA={
+  bomb:      {x:0,   y:630,w:280,h:492},
+  superbomb: {x:0,   y:630,w:280,h:492},
+  rainbow:   {x:280, y:630,w:280,h:492},
+  'stripe-h':{x:560, y:630,w:280,h:492},
+  'stripe-v':{x:840, y:630,w:280,h:492},
+};
+const ICE_SPRITE_DATA={
+  intact: {x:1120,y:630,w:141,h:492},
+  cracked:{x:1261,y:630,w:141,h:492},
+};
+
+function spriteBg(data,sz){
+  const {x,y,w,h}=data;
+  const bw=Math.round(SPRITE_W*sz/w);
+  const bh=Math.round(SPRITE_H*sz/h);
+  const bx=-Math.round(x*sz/w);
+  const by=-Math.round(y*sz/h);
+  return `background-image:url(sprites.png);background-size:${bw}px ${bh}px;background-position:${bx}px ${by}px;background-repeat:no-repeat;`;
+}
+
+// PRNG deterministica: stesse posizioni ad ogni caricamento per ogni livello
+function seededRand(seed){
+  let s = seed;
+  return function(){
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    return s / 0x7fffffff;
+  };
+}
+
+// Posizioni blocker deterministiche (mai in angolo, mai duplicate)
+function getBlockerPositions(levelId, boardSize, count, offset){
+  const rng = seededRand(levelId * 997 + (offset||0) * 31);
+  const positions = [];
+  const used = new Set();
+  let tries = 0;
+  while(positions.length < count && tries < 200){
+    tries++;
+    const r = Math.floor(rng() * boardSize);
+    const c = Math.floor(rng() * boardSize);
+    const key = r * 10 + c;
+    // Evita angoli e celle già usate
+    if(!used.has(key) && !(r===0&&c===0) && !(r===0&&c===boardSize-1)){
+      used.add(key);
+      positions.push({r, c});
+    }
+  }
+  return positions;
+}
+
+// Genera 100 livelli con difficoltà progressiva corretta
+function genLevels(){
+  const levels = [];
+  for(let i=1;i<=100;i++){
+    const world = Math.ceil(i/20);
+    const liw = ((i-1)%20)+1;
+    const diff = (i-1)/99; // 0..1
+
+    // Tabellone: piccolo all'inizio, cresce gradualmente
+    const boardSize = i<=5 ? 5 : (i<=20 ? 6 : (i<=50 ? 7 : 8));
+
+    // Mosse: generose all'inizio
+    const moves = i<=5 ? 30 : (i<=15 ? 28 : Math.max(15, 35 - Math.floor(i/5)));
+
+    // Punteggio base: calibrato per boardSize e num mosse
+    // Ogni mossa con combo base dà ~300-600 punti → target 1 stella = ~10-15 mosse buone
+    const baseScore = boardSize === 5
+      ? Math.round(4000 + diff*3000)   // lv1≈4000 → stars1=1200 (facile ma non triviale)
+      : boardSize === 6
+        ? Math.round(9000 + diff*8000)  // lv6≈9400 → stars1=2800
+        : boardSize === 7
+          ? Math.round(20000 + diff*18000)
+          : Math.round(40000 + diff*40000);
+
+    // Tipi gem: introduce nuovi colori gradualmente
+    const gemTypes = i<=3 ? 3 : (i<=7 ? 4 : (i<=20 ? 5 : 6));
+
+    // ── BLOCKERS (posizioni fisse per livello) ──
+    const blockers = [];
+
+    // Ghiaccio dal livello 8 — aumenta gradualmente
+    const iceStart = 8;
+    if(i >= iceStart){
+      const numIce = Math.min(8, Math.floor((i - iceStart) / 3) + 1);
+      const positions = getBlockerPositions(i, boardSize, numIce, 0);
+      for(const p of positions) blockers.push({type:'ice', row:p.r, col:p.c});
+    }
+
+    // Pietre dal livello 40
+    if(i >= 40){
+      const numStone = Math.min(5, Math.floor((i - 40) / 8) + 1);
+      const positions = getBlockerPositions(i, boardSize, numStone, 500);
+      for(const p of positions) blockers.push({type:'stone', row:p.r, col:p.c});
+    }
+
+    // ── OBIETTIVO ──
+    // 'clear' SOLO se ci sono effettivamente blocchi ghiaccio
+    let objType = 'score';
+    if(i > 7  && i % 7  === 0) objType = 'collect';
+    if(i >= iceStart && i % 11 === 0 && blockers.some(b=>b.type==='ice')) objType = 'clear';
+    if(i > 20 && i % 13 === 0) objType = 'collect';
+
+    let objective;
+    if(objType === 'score'){
+      objective = {type:'score', target: Math.round(baseScore * 0.6)};
+    } else if(objType === 'collect'){
+      const gemColor = (i % gemTypes) + 1;
+      const countNeeded = Math.round(6 + diff * 16);
+      objective = {type:'collect', gemColor, count: countNeeded};
+    } else { // clear
+      const iceBlocksOnBoard = blockers.filter(b=>b.type==='ice').length;
+      const clearCount = Math.min(iceBlocksOnBoard, Math.max(1, Math.round(2 + diff * 5)));
+      objective = {type:'clear', count: clearCount};
+    }
+
+    // Soglie stelle: 1★=30%, 2★=60%, 3★=100%
+    const stars1 = Math.round(baseScore * 0.30);
+    const stars2 = Math.round(baseScore * 0.60);
+    const stars3 = baseScore;
+
+    levels.push({
+      id:i, world, liw, boardSize, moves, gemTypes,
+      objective, blockers, stars1, stars2, stars3,
+      name: LEVEL_NAMES[i] || `Livello ${i}`
+    });
+  }
+  return levels;
+}
+
+const LEVEL_NAMES = {
+  1:'Primo Gomitolo',2:'Due Colori',3:'Il Triangolo',4:'La Linea Rosa',5:'Intreccio Verde',
+  6:'Gomitoli Azzurri',7:'Il Prato Colorato',8:'Fiori Gialli',9:'Viola Mattina',10:'Tutti i Colori',
+  11:'Il Labirinto',12:'La Cascata',13:'Nodi Magici',14:'Il Telaio',15:'Fili Incrociati',
+  16:'La Rete',17:'Trama Dorata',18:'Ordito Stellato',19:'Punti di Croce',20:'Fine del Prato',
+  21:'Il Roseto',22:'Tulipani Blu',23:'Girasoli',24:'Le Ortensie',25:'Gelsomino',
+  26:'La Margherita',27:'Papaveri Rossi',28:'Lavanda',29:'Il Glicine',30:'Rose Gialle',
+  31:'Foglie Dorate',32:'Il Fungo',33:'Radici Magiche',34:'Muschio Verde',35:'La Betulla',
+  36:'Querce Antiche',37:'Il Castagno',38:'Rami Intrecciati',39:'Licheni',40:'Cuore del Bosco',
+  41:'Stelle Danzanti',42:'La Luna Piena',43:'Comete di Lana',44:'Galassie Colorate',45:'Nebulosa Rosa',
+  46:'Il Planetino',47:'Aurore Boreali',48:'Costellazioni',49:'Via Lattea',50:'Metà Viaggio',
+  51:'Cime Innevate',52:'Cristalli di Ghiaccio',53:'La Valanga',54:'Sentiero Bianco',55:'Pini Innevati',
+  56:'Il Rifugio',57:'Luci del Nord',58:'Fiocchi di Neve',59:'La Vetta',60:'Quasi in Cima',
+  61:'Il Castello',62:'Mura Antiche',63:'Torri di Lana',64:'Il Fossato',65:'Ponti di Fili',
+  66:'Armatura Viola',67:'Il Trono',68:'Corone Dorate',69:'Scrigno Segreto',70:'La Chiave',
+  71:'Tempesta Finale',72:'Vento Furioso',73:'Nuvole Scure',74:'Lampi Colorati',75:'Il Tornado',
+  76:'La Sfida',77:'Fili nel Vento',78:'Il Vortice',79:'Caos di Lana',80:'Quasi Finita',
+  81:'L\'Ultima Montagna',82:'Picchi Gemelli',83:'Il Precipizio',84:'Scala di Lana',85:'Cima Dorata',
+  86:'Il Confine',87:'Oltre le Nuvole',88:'Paradiso di Lana',89:'La Tessitura',90:'Pochi Passi',
+  91:'Il Penultimo',92:'Fili d\'Oro',93:'Il Ritrovo',94:'Quasi a Casa',95:'La Strada',
+  96:'Il Ritorno',97:'Fiocco Felice',98:'La Festa',99:'L\'Ultima Sfida',100:'Fine del Viaggio',
+};
+
+const ALL_LEVELS = genLevels();
+
+// ── BOARD ENGINE ─────────────────────────────────────────────
+const EMPTY = 0;
+const BOARD_EL = ()=>document.getElementById('board');
+
+function initBoard(levelDef){
+  const size = levelDef.boardSize;
+  const board = [];
+  for(let r=0;r<size;r++){
+    board[r]=[];
+    for(let c=0;c<size;c++){
+      board[r][c]={type:randGem(levelDef.gemTypes), special:null, blocker:null, hp:0};
+    }
+  }
+  // Apply blockers
+  for(const b of levelDef.blockers){
+    const r=Math.min(b.row,size-1), c=Math.min(b.col,size-1);
+    if(b.type==='ice') board[r][c]={type:randGem(levelDef.gemTypes),special:null,blocker:'ice',hp:2};
+    else if(b.type==='stone') board[r][c]={type:0,special:null,blocker:'stone',hp:2};
+  }
+  // Remove initial matches
+  for(let pass=0;pass<5;pass++){
+    for(let r=0;r<size;r++){
+      for(let c=0;c<size;c++){
+        if(!board[r][c].blocker){
+          let tries=0;
+          while(hasInitialMatch(board,r,c,size)&&tries<10){
+            board[r][c].type=randGem(levelDef.gemTypes);
+            tries++;
+          }
+        }
+      }
+    }
+  }
+  return board;
+}
+
+function randGem(types){ return Math.ceil(Math.random()*types); }
+
+function hasInitialMatch(board,r,c,size){
+  const t=board[r][c].type; if(!t) return false;
+  if(c>=2&&board[r][c-1].type===t&&board[r][c-2].type===t) return true;
+  if(r>=2&&board[r-1][c].type===t&&board[r-2][c].type===t) return true;
+  return false;
+}
+
+function findMatches(board,size){
+  const matched = new Set();
+  // Gem speciali non vengono matchati automaticamente in cascade:
+  // si spostano con la gravità ma si attivano solo con swap diretto
+  const canMatch=(r,c)=>board[r][c].type&&!board[r][c].blocker&&!board[r][c].special;
+  // Horizontal
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size-2;c++){
+      if(!canMatch(r,c)) continue;
+      const t=board[r][c].type;
+      if(canMatch(r,c+1)&&board[r][c+1].type===t&&canMatch(r,c+2)&&board[r][c+2].type===t){
+        let end=c+2;
+        while(end+1<size&&canMatch(r,end+1)&&board[r][end+1].type===t) end++;
+        for(let k=c;k<=end;k++) matched.add(r*100+k);
+        c=end;
+      }
+    }
+  }
+  // Vertical
+  for(let c=0;c<size;c++){
+    for(let r=0;r<size-2;r++){
+      if(!canMatch(r,c)) continue;
+      const t=board[r][c].type;
+      if(canMatch(r+1,c)&&board[r+1][c].type===t&&canMatch(r+2,c)&&board[r+2][c].type===t){
+        let end=r+2;
+        while(end+1<size&&canMatch(end+1,c)&&board[end+1][c].type===t) end++;
+        for(let k=r;k<=end;k++) matched.add(k*100+c);
+        r=end;
+      }
+    }
+  }
+  return matched;
+}
+
+function getMatchGroups(board,size,matched){
+  // Group connected matched cells for special gem creation
+  const groups=[];
+  const visited=new Set();
+  for(const key of matched){
+    if(visited.has(key)) continue;
+    const r0=Math.floor(key/100), c0=key%100;
+    const group=[{r:r0,c:c0}];
+    visited.add(key);
+    // flood fill within matched
+    const queue=[{r:r0,c:c0}];
+    while(queue.length){
+      const {r,c}=queue.shift();
+      for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]){
+        const k=(r+dr)*100+(c+dc);
+        if(matched.has(k)&&!visited.has(k)){
+          visited.add(k);
+          group.push({r:r+dr,c:c+dc});
+          queue.push({r:r+dr,c:c+dc});
+        }
+      }
+    }
+    groups.push(group);
+  }
+  return groups;
+}
+
+function detectSpecial(group,board){
+  // Detect T/L (bomb) or line of 4+ (stripe) or 5+ (rainbow)
+  if(group.length>=5) return 'rainbow';
+  if(group.length===4){
+    const rows=new Set(group.map(g=>g.r));
+    const cols=new Set(group.map(g=>g.c));
+    if(rows.size>1&&cols.size>1) return 'bomb';
+    // All in a line
+    if(rows.size===1) return 'stripe-h';
+    return 'stripe-v';
+  }
+  if(group.length>=4){
+    const rows=new Set(group.map(g=>g.r));
+    const cols=new Set(group.map(g=>g.c));
+    if(rows.size>1&&cols.size>1) return 'bomb';
+  }
+  return null;
+}
+
+// ── RENDERING ────────────────────────────────────────────────
+let CELL_SIZE = 44;
+
+function calcCellSize(){
+  const wrap = document.querySelector('.board-wrap');
+  if(!wrap) return 44;
+  const available = Math.min(wrap.clientWidth-16, wrap.clientHeight-16);
+  const size = gameState.level?.boardSize||8;
+  return Math.floor(available/size);
+}
+
+function renderBoard(){
+  const el = BOARD_EL();
+  const size = gameState.level.boardSize;
+  CELL_SIZE = calcCellSize();
+  const boardPx = CELL_SIZE*size;
+  el.style.width = boardPx+'px';
+  el.style.height = boardPx+'px';
+  el.innerHTML='';
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      createGemEl(r,c);
+    }
+  }
+  setupBoardInput();
+}
+
+function createGemEl(r,c){
+  const cell = gameState.board[r][c];
+  if(!cell) return;
+  const el = document.createElement('div');
+  el.className = buildGemClass(cell);
+  const sz = Math.floor(CELL_SIZE*0.88);
+  el.style.cssText = gemStyle(r,c);
+  el.dataset.r = r; el.dataset.c = c;
+
+  // ── Applica sprite ────────────────────────────────────────
+  if(cell.blocker === 'ice'){
+    const iceData = cell.hp > 1 ? ICE_SPRITE_DATA.intact : ICE_SPRITE_DATA.cracked;
+    el.style.cssText += spriteBg(iceData, sz);
+    el.classList.add('gem-sprite');
+  } else if(cell.blocker === 'stone'){
+    const s = document.createElement('div');
+    s.className = 'gem-stone-sym'; s.textContent = '🪨';
+    el.appendChild(s);
+  } else if(cell.special && SPECIAL_SPRITE_DATA[cell.special]){
+    el.style.cssText += spriteBg(SPECIAL_SPRITE_DATA[cell.special], sz);
+    el.classList.add('gem-sprite');
+    if(cell.special==='stripe-h'||cell.special==='stripe-v'){
+      const bar=document.createElement('div'); bar.className='gem-stripe-bar'; el.appendChild(bar);
+    }
+  } else if(cell.type && GEM_SPRITE_DATA[cell.type]){
+    el.style.cssText += spriteBg(GEM_SPRITE_DATA[cell.type], sz);
+    el.classList.add('gem-sprite');
+  } else if(cell.type){
+    const sym = document.createElement('span');
+    sym.className = 'gem-sym';
+    sym.textContent = GEM_SYMBOLS[cell.type] || '';
+    el.appendChild(sym);
+  }
+
+  BOARD_EL().appendChild(el);
+  return el;
+}
+
+function buildGemClass(cell){
+  let cls = 'gem';
+  if(cell.blocker==='stone') return cls+' blocker-stone';
+  if(cell.blocker==='ice'){
+    cls += ' blocker-ice';
+    if(cell.hp===1) cls += ' ice-cracked';
+    return cls; // niente classe colore: il ghiaccio è completamente opaco
+  }
+  if(cell.type) cls+=` gem-${cell.type}`;
+  if(cell.special==='stripe-h') cls+=' special-stripe-h';
+  else if(cell.special==='stripe-v') cls+=' special-stripe-v';
+  else if(cell.special==='bomb') cls+=' special-bomb';
+  else if(cell.special==='rainbow') cls+=' special-rainbow';
+  else if(cell.special==='superbomb') cls+=' special-superbomb';
+  return cls;
+}
+
+function gemStyle(r,c){
+  const top = r*CELL_SIZE + Math.floor(CELL_SIZE*0.06);
+  const left = c*CELL_SIZE + Math.floor(CELL_SIZE*0.06);
+  const sz = Math.floor(CELL_SIZE*0.88);
+  return `top:${top}px;left:${left}px;width:${sz}px;height:${sz}px;`;
+}
+
+function getGemEl(r,c){
+  return BOARD_EL().querySelector(`[data-r="${r}"][data-c="${c}"]`);
+}
+
+function updateGemEl(r,c){
+  const old=getGemEl(r,c);
+  if(old) old.remove();
+  const cell=gameState.board[r][c];
+  if(cell&&(cell.type||cell.blocker)) createGemEl(r,c);
+}
+
+// ── INPUT HANDLING (swipe diretto, nessuna selezione intermedia) ──────
+let pointerStartX=0, pointerStartY=0, pointerStartR=-1, pointerStartC=-1;
+let pointerActive=false, swipeFired=false;
+const SWIPE_MIN=18, SWIPE_MAX_TAP=12;
+
+function getCellFromPoint(x, y){
+  const board = BOARD_EL();
+  if(!board) return null;
+  const rect = board.getBoundingClientRect();
+  const bx = x - rect.left, by = y - rect.top;
+  const size = gameState.level ? gameState.level.boardSize : 6;
+  const c = Math.floor(bx / CELL_SIZE);
+  const r = Math.floor(by / CELL_SIZE);
+  if(r<0||r>=size||c<0||c>=size) return null;
+  return {r,c};
+}
+
+function onPointerDown(e){
+  if(gameState.animating||gameState.paused) return;
+  const pt = e.touches ? e.touches[0] : e;
+  pointerStartX=pt.clientX; pointerStartY=pt.clientY;
+  const cell = getCellFromPoint(pt.clientX, pt.clientY);
+  if(!cell) return;
+  pointerStartR=cell.r; pointerStartC=cell.c;
+  pointerActive=true; swipeFired=false;
+  getAudio();
+  // Mostra selezione visiva
+  deselectAll();
+  const el = getGemEl(cell.r, cell.c);
+  if(el) el.classList.add('selected');
+  e.preventDefault();
+}
+
+function onPointerMove(e){
+  if(!pointerActive||swipeFired) return;
+  const pt = e.touches ? e.touches[0] : e;
+  const dx = pt.clientX - pointerStartX;
+  const dy = pt.clientY - pointerStartY;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  if(dist < SWIPE_MIN) return;
+  // Swipe rilevato
+  swipeFired = true;
+  deselectAll();
+  let dr=0, dc=0;
+  if(Math.abs(dx) > Math.abs(dy)){ dc = dx>0?1:-1; }
+  else { dr = dy>0?1:-1; }
+  const size = gameState.level ? gameState.level.boardSize : 6;
+  const tr = pointerStartR+dr, tc = pointerStartC+dc;
+  if(tr>=0&&tr<size&&tc>=0&&tc<size){
+    handleSwipe(pointerStartR,pointerStartC,tr,tc);
+  }
+  pointerActive=false;
+  e.preventDefault();
+}
+
+function onPointerUp(e){
+  if(!pointerActive) return;
+  pointerActive=false;
+  if(!swipeFired){
+    // Era un tap — selezione classica come fallback su desktop
+    deselectAll();
+    if(pointerStartR>=0){
+      // Secondo tap = swap se c'era già selezione? No: su mobile solo swipe.
+      // Su desktop lasciamo funzionare il click sull'elemento direttamente.
+    }
+  }
+  deselectAll();
+}
+
+// Listener a livello board per catturare tutti i movimenti
+function setupBoardInput(){
+  const board = BOARD_EL();
+  if(!board) return;
+  board.addEventListener('touchstart', onPointerDown, {passive:false});
+  board.addEventListener('touchmove', onPointerMove, {passive:false});
+  board.addEventListener('touchend', onPointerUp, {passive:false});
+  board.addEventListener('mousedown', onPointerDown);
+  board.addEventListener('mousemove', onPointerMove);
+  board.addEventListener('mouseup', onPointerUp);
+}
+
+function deselectAll(){
+  document.querySelectorAll('.gem.selected').forEach(el=>el.classList.remove('selected'));
+}
+
+// ── RILEVAMENTO 2×2 QUADRATO ──────────────────────────────────
+function find2x2Squares(board, size){
+  const squares=[];
+  const used=new Set();
+  for(let r=0;r<size-1;r++){
+    for(let c=0;c<size-1;c++){
+      const t=board[r][c].type;
+      if(!t||board[r][c].blocker) continue;
+      if(board[r][c+1].type===t&&board[r+1][c].type===t&&board[r+1][c+1].type===t&&
+         !board[r][c].special&&!board[r][c+1].special&&
+         !board[r+1][c].special&&!board[r+1][c+1].special){
+        // evita quadrati sovrapposti
+        const key=r*100+c;
+        if(!used.has(key)){
+          squares.push({r,c,t});
+          used.add(key); used.add(r*100+c+1);
+          used.add((r+1)*100+c); used.add((r+1)*100+c+1);
+        }
+      }
+    }
+  }
+  return squares;
+}
+
+// ── ATTIVAZIONE GEM SPECIALI ──────────────────────────────────
+async function activateRainbow(r, c, targetColor){
+  const size=gameState.level.boardSize;
+  const board=gameState.board;
+  // Rimuovi il gem arcobaleno
+  board[r][c]={type:0,special:null,blocker:null,hp:0};
+  // Trova tutti i gem del colore target
+  const toRemove=[];
+  for(let pr=0;pr<size;pr++){
+    for(let pc=0;pc<size;pc++){
+      if(board[pr][pc].type===targetColor&&!board[pr][pc].blocker){
+        toRemove.push({r:pr,c:pc});
+      }
+    }
+  }
+  // Anima e rimuovi
+  for(const {r:pr,c:pc} of toRemove){
+    const el=getGemEl(pr,pc);
+    if(el) el.classList.add('matched');
+    spawnParticles(pr,pc,targetColor);
+    trackObjective(board[pr][pc],pr,pc);
+  }
+  await sleep(150);
+  const pts=toRemove.length*120*Math.max(1,gameState.combo);
+  gameState.score+=pts;
+  showScorePopup(pts);
+  updateHUD();
+  for(const {r:pr,c:pc} of toRemove){
+    board[pr][pc]={type:0,special:null,blocker:null,hp:0};
+  }
+  SFX.rainbow();
+}
+
+async function activateStripe(r, c, dir){
+  const size=gameState.level.boardSize;
+  const board=gameState.board;
+  board[r][c]={type:0,special:null,blocker:null,hp:0};
+  const cells=[];
+  if(dir==='stripe-h'){
+    for(let cc=0;cc<size;cc++) cells.push({r,c:cc});
+  } else {
+    for(let rr=0;rr<size;rr++) cells.push({r:rr,c});
+  }
+  for(const {r:pr,c:pc} of cells){
+    const cell=board[pr][pc];
+    if(!cell.type&&!cell.blocker) continue;
+    if(cell.blocker==='stone') continue;
+    if(cell.blocker==='ice'){
+      cell.hp--;
+      if(cell.hp>0){ updateGemEl(pr,pc); continue; }
+      cell.blocker=null;
+    }
+    trackObjective(cell,pr,pc);
+    spawnParticles(pr,pc,cell.type||1);
+    const el=getGemEl(pr,pc);
+    if(el) el.classList.add('matched');
+    board[pr][pc]={type:0,special:null,blocker:null,hp:0};
+  }
+  const pts=cells.length*80*Math.max(1,gameState.combo);
+  gameState.score+=pts;
+  showScorePopup(pts);
+  updateHUD();
+  await sleep(200);
+  if(dir==='stripe-h') SFX.stripeH(); else SFX.stripeV();
+}
+
+async function activateBomb(r, c, radius){
+  const rad=radius||1; // 1 = 3×3, 2 = 5×5
+  const size=gameState.level.boardSize;
+  const board=gameState.board;
+  board[r][c]={type:0,special:null,blocker:null,hp:0};
+  const cells=[];
+  for(let pr=r-rad;pr<=r+rad;pr++){
+    for(let pc=c-rad;pc<=c+rad;pc++){
+      if(pr>=0&&pr<size&&pc>=0&&pc<size) cells.push({r:pr,c:pc});
+    }
+  }
+  for(const {r:pr,c:pc} of cells){
+    const cell=board[pr][pc];
+    if(!cell.type&&!cell.blocker) continue;
+    if(cell.blocker==='stone') continue;
+    if(cell.blocker==='ice'){
+      cell.hp--;
+      if(cell.hp>0){ updateGemEl(pr,pc); continue; }
+      cell.blocker=null;
+    }
+    trackObjective(cell,pr,pc);
+    spawnParticles(pr,pc,cell.type||1);
+    const el=getGemEl(pr,pc);
+    if(el) el.classList.add('matched');
+    board[pr][pc]={type:0,special:null,blocker:null,hp:0};
+  }
+  const pts=cells.length*100*Math.max(1,gameState.combo);
+  gameState.score+=pts;
+  showScorePopup(pts);
+  updateHUD();
+  await sleep(250);
+  if(radius>1) SFX.superbomb(); else SFX.bomb();
+}
+
+async function activateSpecialSwap(r1,c1,r2,c2){
+  const board=gameState.board;
+  const cell1=board[r1][c1];
+  const cell2=board[r2][c2];
+  const sp1=cell1.special, sp2=cell2.special;
+
+  // Rainbow vs qualcosa: rimuove tutto quel colore
+  if(sp1==='rainbow'||sp2==='rainbow'){
+    const rainbowR=sp1==='rainbow'?r1:r2;
+    const rainbowC=sp1==='rainbow'?c1:c2;
+    const otherR=sp1==='rainbow'?r2:r1;
+    const otherC=sp1==='rainbow'?c2:c1;
+    const targetColor=board[otherR][otherC].type||1;
+    // Rimuovi anche l'altro gem target
+    spawnParticles(otherR,otherC,targetColor);
+    board[otherR][otherC]={type:0,special:null,blocker:null,hp:0};
+    await activateRainbow(rainbowR,rainbowC,targetColor);
+  }
+  // Bomb vs Bomb: super esplosione 5×5
+  else if(sp1==='bomb'&&sp2==='bomb'){
+    board[r2][c2]={type:0,special:null,blocker:null,hp:0};
+    await activateBomb(r1,c1,2);
+  }
+  // Stripe vs Stripe: pulisce riga+colonna
+  else if((sp1==='stripe-h'||sp1==='stripe-v')&&(sp2==='stripe-h'||sp2==='stripe-v')){
+    await activateStripe(r1,c1,'stripe-h');
+    await activateStripe(r2,c2,'stripe-v');
+  }
+  // Bomb vs Stripe: croce + esplosione
+  else if((sp1==='bomb'&&(sp2==='stripe-h'||sp2==='stripe-v'))||
+          (sp2==='bomb'&&(sp1==='stripe-h'||sp1==='stripe-v'))){
+    const br=sp1==='bomb'?r1:r2, bc=sp1==='bomb'?c1:c2;
+    await activateStripe(sp1==='bomb'?r2:r1, sp1==='bomb'?c2:c1, sp2==='bomb'?sp1:sp2);
+    await activateBomb(br,bc,1);
+  }
+  // Singolo stripe
+  else if(sp1==='stripe-h'||sp1==='stripe-v'){
+    await activateStripe(r1,c1,sp1);
+  } else if(sp2==='stripe-h'||sp2==='stripe-v'){
+    await activateStripe(r2,c2,sp2);
+  }
+  // Singola bomb
+  else if(sp1==='bomb'){ await activateBomb(r1,c1,1); }
+  else if(sp2==='bomb'){ await activateBomb(r2,c2,1); }
+  // Superbomb: pulisce 5×5
+  else if(sp1==='superbomb'||sp2==='superbomb'){
+    const sbR=sp1==='superbomb'?r1:r2, sbC=sp1==='superbomb'?c1:c2;
+    await activateBomb(sbR,sbC,2);
+  }
+}
+
+async function process2x2(sq){
+  const board=gameState.board;
+  const cells=[{r:sq.r,c:sq.c},{r:sq.r,c:sq.c+1},{r:sq.r+1,c:sq.c},{r:sq.r+1,c:sq.c+1}];
+  // Animazione rimozione
+  for(const {r,c} of cells){
+    const el=getGemEl(r,c);
+    if(el) el.classList.add('matched');
+    spawnParticles(r,c,sq.t);
+    trackObjective(board[r][c],r,c);
+  }
+  await sleep(150);
+  // Crea super bomb al centro
+  const cr=sq.r, cc=sq.c;
+  for(const {r,c} of cells) board[r][c]={type:0,special:null,blocker:null,hp:0};
+  // Piazza superbomb al centro-alto del quadrato
+  board[cr][cc]={type:sq.t,special:'superbomb',blocker:null,hp:0};
+  const pts=500*Math.max(1,gameState.combo);
+  gameState.score+=pts;
+  showScorePopup(pts);
+  updateHUD();
+  SFX.combo(2);
+}
+
+async function handleSwipe(r1,c1,r2,c2){
+  if(gameState.animating) return;
+  deselectAll(); gameState.selected=null;
+  const board=gameState.board;
+  // Blocchi ghiaccio non si possono spostare
+  const b1=gameState.board[r1][c1], b2=gameState.board[r2][c2];
+  if(b1.blocker==='ice'||b2.blocker==='ice'){
+    SFX.invalid();
+    const el=getGemEl(b1.blocker==='ice'?r1:r2, b1.blocker==='ice'?c1:c2);
+    if(el){ el.classList.add('shake'); setTimeout(()=>el.classList.remove('shake'),400); }
+    return;
+  }
+  const cell1=board[r1][c1];
+  const cell2=board[r2][c2];
+
+  // Se almeno un gem è speciale → attiva effetto speciale
+  if(cell1.special||cell2.special){
+    gameState.animating=true;
+    SFX.swap();
+    swapCells(r1,c1,r2,c2);
+    await animateSwap(r1,c1,r2,c2);
+    gameState.moves--;
+    updateHUD();
+    gameState.combo=1;
+    await activateSpecialSwap(r1,c1,r2,c2);
+    await gravityAndRefill();
+    const newM=findMatches(board,gameState.level.boardSize);
+    if(newM.size>0) await processMatches(newM);
+    else { gameState.animating=false; gameState.combo=0; checkHints(); }
+    checkEndConditions();
+    return;
+  }
+
+  SFX.swap();
+  swapCells(r1,c1,r2,c2);
+  await animateSwap(r1,c1,r2,c2);
+
+  const size=gameState.level.boardSize;
+  const matches=findMatches(board,size);
+  const squares=find2x2Squares(board,size);
+
+  if(matches.size===0&&squares.length===0){
+    SFX.invalid();
+    swapCells(r1,c1,r2,c2);
+    await animateSwap(r1,c1,r2,c2);
+    return;
+  }
+  // Mossa valida
+  gameState.moves--;
+  updateHUD();
+  gameState.combo=0;
+
+  // Prima i quadrati 2×2 → creano super bomb
+  if(squares.length>0){
+    for(const sq of squares) await process2x2(sq);
+    await gravityAndRefill();
+  }
+  // Poi i match normali
+  if(matches.size>0) await processMatches(matches);
+  else {
+    const newM=findMatches(board,size);
+    if(newM.size>0) await processMatches(newM);
+    else { gameState.animating=false; gameState.combo=0; checkHints(); }
+  }
+  checkEndConditions();
+}
+
+function swapCells(r1,c1,r2,c2){
+  const tmp=gameState.board[r1][c1];
+  gameState.board[r1][c1]=gameState.board[r2][c2];
+  gameState.board[r2][c2]=tmp;
+}
+
+function animateSwap(r1,c1,r2,c2){
+  return new Promise(res=>{
+    updateGemEl(r1,c1); updateGemEl(r2,c2);
+    setTimeout(res,80);
+  });
+}
+
+async function processMatches(matches){
+  gameState.animating=true;
+  gameState.combo++;
+  const size=gameState.level.boardSize;
+  const board=gameState.board;
+  const groups=getMatchGroups(board,size,matches);
+
+  // Score
+  let matchScore=0;
+  for(const g of groups) matchScore+=g.length*100*gameState.combo;
+
+  // Obiettivi
+  for(const key of matches){
+    const r=Math.floor(key/100), c=key%100;
+    trackObjective(board[r][c],r,c);
+  }
+
+  // Animazione rimozione
+  for(const key of matches){
+    const r=Math.floor(key/100), c=key%100;
+    const el=getGemEl(r,c);
+    if(el){ el.classList.add('matched'); spawnParticles(r,c,board[r][c].type); }
+  }
+
+  if(gameState.combo>=2){ SFX.combo(gameState.combo); showComboPopup(gameState.combo); }
+  else { if(matches.size>=4) SFX.match4(); else SFX.match3(); }
+  showScorePopup(matchScore);
+  gameState.score+=matchScore;
+  updateHUD();
+  await sleep(220);
+
+  // Determina nuovi gem speciali da creare (traccia per POSIZIONE CENTRO)
+  const newSpecialMap=new Map(); // key → {special, gemType}
+  for(const g of groups){
+    const sp=detectSpecial(g,board);
+    if(sp){
+      const cr=Math.round(g.reduce((s,x)=>s+x.r,0)/g.length);
+      const cc=Math.round(g.reduce((s,x)=>s+x.c,0)/g.length);
+      const gemType=board[cr][cc].type||board[g[0].r][g[0].c].type||1;
+      newSpecialMap.set(cr*100+cc,{sp,gemType});
+    }
+  }
+
+  // Gem speciali esistenti catturati nel match → devono esplodere
+  const specialsToFire=[];
+  for(const key of matches){
+    const r=Math.floor(key/100), c=key%100;
+    const cell=board[r][c];
+    if(cell.special&&!newSpecialMap.has(key)){
+      specialsToFire.push({r,c,special:cell.special,color:cell.type});
+    }
+  }
+
+  // Rimuovi celle matched
+  for(const key of matches){
+    const r=Math.floor(key/100), c=key%100;
+    const cell=board[r][c];
+    if(newSpecialMap.has(key)){
+      const {sp,gemType}=newSpecialMap.get(key);
+      board[r][c]={type:gemType,special:sp,blocker:null,hp:0};
+      continue;
+    }
+    if(cell.blocker==='ice'){
+      cell.hp--;
+      if(cell.hp>0){ SFX.iceCrack(); updateGemEl(r,c); continue; }
+      cell.blocker=null;
+      SFX.iceBreak();
+    }
+    board[r][c]={type:0,special:null,blocker:null,hp:0};
+  }
+
+  // Esplodi speciali catturati
+  for(const {r,c,special,color} of specialsToFire){
+    if(special==='stripe-h'||special==='stripe-v') await activateStripe(r,c,special);
+    else if(special==='bomb') await activateBomb(r,c,1);
+    else if(special==='superbomb') await activateBomb(r,c,2);
+    else if(special==='rainbow'){
+      // Usa il colore più comune tra i gem adiacenti
+      let tc=color||1;
+      for(const key2 of matches){
+        const rr=Math.floor(key2/100),cc2=key2%100;
+        if(board[rr][cc2].type){tc=board[rr][cc2].type;break;}
+      }
+      board[r][c]={type:0,special:null,blocker:null,hp:0};
+      await activateRainbow(r,c,tc);
+    }
+  }
+
+  await gravityAndRefill();
+
+  // Controlla anche quadrati 2×2 nelle chain reaction
+  const newSquares=find2x2Squares(board,size);
+  if(newSquares.length>0){
+    for(const sq of newSquares) await process2x2(sq);
+    await gravityAndRefill();
+  }
+  const newMatches=findMatches(board,size);
+  if(newMatches.size>0){
+    await processMatches(newMatches);
+  } else {
+    gameState.animating=false;
+    gameState.combo=0;
+    checkHints();
+  }
+}
+
+async function gravityAndRefill(){
+  const size=gameState.level.boardSize;
+  // Apply gravity
+  for(let c=0;c<size;c++){
+    let empty=size-1;
+    for(let r=size-1;r>=0;r--){
+      if(gameState.board[r][c].type||gameState.board[r][c].blocker==='stone'){
+        if(r!==empty){
+          gameState.board[empty][c]=gameState.board[r][c];
+          gameState.board[r][c]={type:0,special:null,blocker:null,hp:0};
+        }
+        empty--;
+      }
+    }
+    // Fill from top
+    for(let r=empty;r>=0;r--){
+      gameState.board[r][c]={type:randGem(gameState.level.gemTypes),special:null,blocker:null,hp:0};
+    }
+  }
+  rerenderBoard();
+  await sleep(280);
+}
+
+function rerenderBoard(){
+  const el=BOARD_EL();
+  el.innerHTML='';
+  const size=gameState.level.boardSize;
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      const cell=gameState.board[r][c];
+      if(cell.type||cell.blocker) createGemEl(r,c);
+    }
+  }
+}
+
+// ── OBJECTIVES ────────────────────────────────────────────────
+function initObjectives(level){
+  const obj=level.objective;
+  if(obj.type==='score') gameState.objectives={type:'score',current:0,target:obj.target};
+  else if(obj.type==='collect') gameState.objectives={type:'collect',gemColor:obj.gemColor,current:0,target:obj.count};
+  else if(obj.type==='clear') gameState.objectives={type:'clear',current:0,target:obj.count};
+}
+
+function trackObjective(cell,r,c){
+  const obj=gameState.objectives;
+  if(obj.type==='collect'&&cell.type===obj.gemColor) obj.current++;
+  else if(obj.type==='clear'&&cell.blocker==='ice') obj.current++;
+}
+
+function checkObjectiveDone(){
+  const obj=gameState.objectives;
+  if(obj.type==='score') return gameState.score>=obj.target;
+  return obj.current>=obj.target;
+}
+
+function renderObjectives(){
+  const el=document.getElementById('game-objectives');
+  el.innerHTML='';
+  const obj=gameState.objectives;
+  const level=gameState.level;
+
+  // Score chip
+  const s1=document.createElement('div');
+  s1.className='obj-chip';
+  s1.id='obj-score';
+  s1.innerHTML=`⭐ ${gameState.score}/${level.stars1}`;
+  el.appendChild(s1);
+
+  if(obj.type==='collect'){
+    const chip=document.createElement('div');
+    chip.className='obj-chip'+(obj.current>=obj.target?' done':'');
+    chip.id='obj-collect';
+    chip.innerHTML=`${GEM_EMOJI[obj.gemColor]} ${obj.current}/${obj.target}`;
+    el.appendChild(chip);
+  } else if(obj.type==='clear'){
+    const chip=document.createElement('div');
+    chip.className='obj-chip'+(obj.current>=obj.target?' done':'');
+    chip.id='obj-clear';
+    chip.innerHTML=`🧊 ${obj.current}/${obj.target}`;
+    el.appendChild(chip);
+  }
+}
+
+function updateObjectivesUI(){
+  const obj=gameState.objectives;
+  const level=gameState.level;
+  const el=document.getElementById('game-objectives');
+  if(!el) return;
+
+  const s1=el.querySelector('#obj-score');
+  if(s1) s1.innerHTML=`⭐ ${gameState.score}/${level.stars1}`;
+
+  if(obj.type==='collect'){
+    let chip=el.querySelector('#obj-collect');
+    if(chip){
+      chip.className='obj-chip'+(obj.current>=obj.target?' done':'');
+      chip.innerHTML=`${GEM_EMOJI[obj.gemColor]} ${obj.current}/${obj.target}`;
+    }
+  } else if(obj.type==='clear'){
+    let chip=el.querySelector('#obj-clear');
+    if(chip){
+      chip.className='obj-chip'+(obj.current>=obj.target?' done':'');
+      chip.innerHTML=`🧊 ${obj.current}/${obj.target}`;
+    }
+  }
+}
+
+// ── HUD ──────────────────────────────────────────────────────
+function updateHUD(){
+  document.getElementById('game-score').textContent=gameState.score.toLocaleString('it');
+  document.getElementById('game-moves').textContent=gameState.moves;
+  updateObjectivesUI();
+}
+
+// ── VISUAL FX ────────────────────────────────────────────────
+const GEM_COLORS=['','#ff4d6d','#3a9eea','#2ecc71','#f0b800','#9333ea','#e07b00'];
+
+function spawnParticles(r,c,type){
+  const board=BOARD_EL();
+  const color=GEM_COLORS[type]||'#ff85a1';
+  const cx=c*CELL_SIZE+CELL_SIZE/2;
+  const cy=r*CELL_SIZE+CELL_SIZE/2;
+  for(let i=0;i<6;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const angle=Math.random()*Math.PI*2;
+    const dist=30+Math.random()*30;
+    p.style.cssText=`left:${cx}px;top:${cy}px;width:6px;height:6px;background:${color};--px:${Math.cos(angle)*dist}px;--py:${Math.sin(angle)*dist}px;`;
+    board.appendChild(p);
+    setTimeout(()=>p.remove(),650);
+  }
+}
+
+function showScorePopup(pts){
+  const board=BOARD_EL();
+  const el=document.createElement('div');
+  el.className='score-popup';
+  el.textContent='+'+pts.toLocaleString('it');
+  const sel=gameState.selected;
+  const r=sel?.r??2, c=sel?.c??2;
+  el.style.left=(c*CELL_SIZE+CELL_SIZE/2-20)+'px';
+  el.style.top=(r*CELL_SIZE)+'px';
+  board.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
+
+function showComboPopup(n){
+  const board=BOARD_EL();
+  const el=document.createElement('div');
+  el.className='score-popup combo';
+  el.textContent=`COMBO x${n}! 🧶`;
+  el.style.left='50%'; el.style.top='40%';
+  el.style.transform='translateX(-50%)';
+  board.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
+
+// ── HINTS ────────────────────────────────────────────────────
+let hintTimer=null;
+function checkHints(){
+  clearTimeout(hintTimer);
+  hintTimer=setTimeout(()=>{
+    const hint=findHint();
+    if(hint){
+      const el=getGemEl(hint.r,hint.c);
+      if(el) el.classList.add('hint');
+      setTimeout(()=>{ el?.classList.remove('hint'); },1500);
+    }
+  },4000);
+}
+
+function findHint(){
+  const size=gameState.level.boardSize;
+  const board=gameState.board;
+  // Try all horizontal swaps
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size-1;c++){
+      swapCells(r,c,r,c+1);
+      const m=findMatches(board,size);
+      swapCells(r,c,r,c+1);
+      if(m.size>0) return {r,c};
+    }
+  }
+  // Try vertical swaps
+  for(let r=0;r<size-1;r++){
+    for(let c=0;c<size;c++){
+      swapCells(r,c,r+1,c);
+      const m=findMatches(board,size);
+      swapCells(r,c,r+1,c);
+      if(m.size>0) return {r,c};
+    }
+  }
+  return null;
+}
+
+// ── END CONDITIONS ────────────────────────────────────────────
+function checkEndConditions(){
+  const obj=gameState.objectives;
+  const level=gameState.level;
+
+  // Check win
+  let won=false;
+  if(obj.type==='score') won=gameState.score>=level.stars1;
+  else if(obj.type==='collect') won=obj.current>=obj.target;
+  else if(obj.type==='clear') won=obj.current>=obj.target;
+
+  if(won){
+    setTimeout(()=>showWin(),500);
+    return;
+  }
+
+  // Check out of moves
+  if(gameState.moves<=0){
+    setTimeout(()=>showLose(),500);
+  }
+}
+
+function showWin(){
+  clearTimeout(hintTimer);
+  SFX.win();
+  const level=gameState.level;
+  const score=gameState.score;
+  let stars=1;
+  if(score>=level.stars3) stars=3;
+  else if(score>=level.stars2) stars=2;
+
+  const num=level.id;
+  const prev=gameState.levelStars[num]||0;
+  if(stars>prev){
+    gameState.levelStars[num]=stars;
+    if(num===gameState.currentLevelNum) gameState.currentLevelNum=Math.min(100,num+1);
+  }
+  if(!gameState.levelBest[num]||score>gameState.levelBest[num]) gameState.levelBest[num]=score;
+  saveState();
+
+  document.getElementById('win-level-text').textContent=`Livello ${num} completato!`;
+  document.getElementById('win-score-val').textContent=score.toLocaleString('it');
+
+  const s1=document.getElementById('win-star-1');
+  const s2=document.getElementById('win-star-2');
+  const s3=document.getElementById('win-star-3');
+  s1.className='win-star'; s2.className='win-star'; s3.className='win-star';
+
+  showScreen('win');
+  setTimeout(()=>{ s1.classList.add('earned'); },300);
+  if(stars>=2) setTimeout(()=>{ s2.classList.add('earned'); },600);
+  if(stars>=3) setTimeout(()=>{ s3.classList.add('earned'); },900);
+}
+
+function showLose(){
+  clearTimeout(hintTimer);
+  SFX.lose();
+  gameState.lives = Math.max(0,gameState.lives-1);
+  gameState.lastLifeRegen = Date.now();
+  saveState();
+
+  const level=gameState.level;
+  const obj=gameState.objectives;
+  let msg='Non abbastanza punti questa volta...<br>Fiocco ci riprova!';
+  if(obj.type==='collect') msg=`Solo ${obj.current}/${obj.target} gomitoli raccolti...<br>Ci manca poco!`;
+  else if(obj.type==='clear') msg=`Solo ${obj.current}/${obj.target} blocchi rotti...<br>Ancora un po\'!`;
+  document.getElementById('lose-text').innerHTML=msg;
+  showScreen('lose');
+}
+
+// ── LIFE SYSTEM ──────────────────────────────────────────────
+function regenLives(){
+  const now=Date.now();
+  if(gameState.lives>=MAX_LIVES) return;
+  const elapsed=now-gameState.lastLifeRegen;
+  const regens=Math.floor(elapsed/LIFE_REGEN_MS);
+  if(regens>0){
+    gameState.lives=Math.min(MAX_LIVES,gameState.lives+regens);
+    gameState.lastLifeRegen=now-(elapsed%LIFE_REGEN_MS);
+    saveState();
+  }
+}
+
+function timeToNextLife(){
+  if(gameState.lives>=MAX_LIVES) return null;
+  const elapsed=Date.now()-gameState.lastLifeRegen;
+  const remaining=LIFE_REGEN_MS-elapsed;
+  const m=Math.floor(remaining/60000);
+  const s=Math.floor((remaining%60000)/1000);
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+setInterval(()=>{ regenLives(); updateLivesUI(); },10000);
+
+function updateLivesUI(){
+  regenLives();
+  const hearts='❤️'.repeat(gameState.lives)+'🖤'.repeat(Math.max(0,MAX_LIVES-gameState.lives));
+  document.getElementById('menu-lives-count').textContent=gameState.lives;
+  document.getElementById('wm-lives').textContent=gameState.lives;
+  document.getElementById('shop-lives-count').textContent=gameState.lives+'/'+MAX_LIVES;
+}
+
+// ── SUPABASE SYNC ─────────────────────────────────────────────
+async function syncToSupabase(){
+  const sb=state.supabase;
+  if(!sb.url||!sb.key||!sb.user) return;
+  try{
+    const payload={
+      user_id: sb.user,
+      level_stars: gameState.levelStars,
+      level_best: gameState.levelBest,
+      current_level: gameState.currentLevelNum,
+      updated_at: new Date().toISOString(),
+    };
+    await fetch(`${sb.url}/rest/v1/fiocco_progress`, {
+      method:'POST',
+      headers:{
+        'apikey':sb.key,
+        'Authorization':'Bearer '+sb.key,
+        'Content-Type':'application/json',
+        'Prefer':'resolution=merge-duplicates',
+      },
+      body:JSON.stringify(payload),
+    });
+  }catch(e){ console.warn('Supabase sync failed',e); }
+}
+
+// ── SCREEN MANAGEMENT ─────────────────────────────────────────
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('screen-'+name);
+  if(el) el.classList.add('active');
+  gameState.screen=name;
+  if(name==='menu') updateLivesUI();
+  if(name==='shop') updateLivesUI();
+  if(name==='settings') loadSettingsUI();
+}
+
+function goToWorldmap(){
+  buildWorldmap();
+  showScreen('worldmap');
+}
+
+function buildWorldmap(){
+  const scroll=document.getElementById('worldmap-scroll');
+  scroll.innerHTML='';
+  for(let w=1;w<=5;w++){
+    const sec=document.createElement('div');
+    sec.className='world-section';
+    const banner=document.createElement('div');
+    banner.className=`world-banner world-${w}-banner`;
+    banner.innerHTML=`<span class="world-banner-icon">${WORLD_ICONS[w]}</span><div class="world-banner-text"><div class="world-banner-name">${WORLD_NAMES[w]}</div><div class="world-banner-desc">${WORLD_DESCS[w]}</div></div>`;
+    sec.appendChild(banner);
+
+    const grid=document.createElement('div');
+    grid.className='levels-grid';
+
+    for(let li=1;li<=20;li++){
+      const num=(w-1)*20+li;
+      const node=document.createElement('div');
+      const stars=gameState.levelStars[num]||0;
+      const unlocked=num<=gameState.currentLevelNum;
+      const isCurrent=num===gameState.currentLevelNum;
+
+      let cls='level-node';
+      if(!unlocked) cls+=' locked';
+      else{
+        cls+=' unlocked';
+        if(stars===1) cls+=' completed-1';
+        else if(stars===2) cls+=' completed-2';
+        else if(stars===3) cls+=' completed-3';
+      }
+      if(isCurrent) cls+=' current-level';
+      node.className=cls;
+
+      if(!unlocked){
+        node.innerHTML=`<span class="level-lock">🔒</span>`;
+      } else {
+        const starStr=stars>0?'⭐'.repeat(stars):'';
+        node.innerHTML=`<span>${num}</span>${starStr?`<span class="level-stars">${starStr}</span>`:''}`;
+        node.addEventListener('click',()=>showLevelInfo(num));
+        node.addEventListener('touchend',()=>showLevelInfo(num));
+      }
+      grid.appendChild(node);
+    }
+    sec.appendChild(grid);
+    scroll.appendChild(sec);
+  }
+  updateLivesUI();
+
+  // Scroll to current level
+  setTimeout(()=>{
+    const world=Math.ceil(gameState.currentLevelNum/20);
+    const sections=scroll.querySelectorAll('.world-section');
+    if(sections[world-1]) sections[world-1].scrollIntoView({behavior:'smooth'});
+  },100);
+}
+
+let pendingLevelNum=1;
+function showLevelInfo(num){
+  const level=ALL_LEVELS[num-1];
+  if(!level) return;
+  pendingLevelNum=num;
+
+  document.getElementById('li-num').textContent=`Livello ${num}`;
+  document.getElementById('li-world').textContent=WORLD_NAMES[level.world];
+  document.getElementById('li-name').textContent=level.name;
+  document.getElementById('li-moves').textContent=level.moves;
+  document.getElementById('li-icon').textContent=WORLD_ICONS[level.world];
+
+  const stars=gameState.levelStars[num]||0;
+  document.getElementById('li-stars').textContent=stars?'⭐'.repeat(stars):'Nessuna stella';
+  const best=gameState.levelBest[num];
+  document.getElementById('li-best').textContent=best?best.toLocaleString('it'):'—';
+
+  const obj=level.objective;
+  let objText='';
+  if(obj.type==='score') objText=`🎯 Raggiungi ${obj.target.toLocaleString('it')} punti`;
+  else if(obj.type==='collect') objText=`${GEM_EMOJI[obj.gemColor]} Raccogli ${obj.count} gomitoli ${GEM_NAMES[obj.gemColor].toLowerCase()}`;
+  else if(obj.type==='clear') objText=`🧊 Sciogli ${obj.count} blocchi di ghiaccio`;
+  document.getElementById('li-objective').textContent=objText;
+
+  showScreen('levelinfo');
+}
+
+function startLevel(){
+  if(gameState.lives<=0){
+    showToast('Non hai vite! Vai al negozio per recuperarne. 🐰');
+    showScreen('shop');
+    return;
+  }
+  const level=ALL_LEVELS[pendingLevelNum-1];
+  if(!level) return;
+
+  gameState.level=level;
+  gameState.board=initBoard(level);
+  gameState.score=0;
+  gameState.moves=level.moves;
+  gameState.combo=0;
+  gameState.selected=null;
+  gameState.animating=false;
+  gameState.paused=false;
+  initObjectives(level);
+
+  showScreen('game');
+
+  // Set up board after render
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      CELL_SIZE=calcCellSize();
+      renderBoard();
+      renderObjectives();
+      updateHUD();
+      setTimeout(checkHints,3000);
+    });
+  });
+}
+
+function nextLevel(){
+  const next=Math.min(100,gameState.level.id+1);
+  if(next>gameState.currentLevelNum) gameState.currentLevelNum=next;
+  showLevelInfo(next);
+  showScreen('levelinfo');
+}
+
+function retryLevel(){
+  startLevel();
+}
+
+function quitGame(){
+  clearTimeout(hintTimer);
+  document.getElementById('overlay-pause').classList.remove('active');
+  gameState.paused=false;
+  goToWorldmap();
+}
+
+function togglePause(){
+  gameState.paused=!gameState.paused;
+  const ov=document.getElementById('overlay-pause');
+  if(gameState.paused) ov.classList.add('active');
+  else ov.classList.remove('active');
+}
+
+// ── SHOP ─────────────────────────────────────────────────────
+function buyLives(){
+  SFX.buy();
+  gameState.lives=Math.min(MAX_LIVES+20,gameState.lives+20);
+  gameState.lastLifeRegen=Date.now();
+  saveState();
+  updateLivesUI();
+  showToast('🎉 Hai ricevuto 20 vite! Buon gioco, da Fiocco con ❤️');
+  haptic();
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────
+function toggleSetting(key){
+  state.settings[key]=!state.settings[key];
+  settings=state.settings;
+  document.getElementById('toggle-'+key).className='toggle'+(state.settings[key]?' on':'');
+}
+
+function loadSettingsUI(){
+  for(const k of ['sound','music','haptic']){
+    document.getElementById('toggle-'+k).className='toggle'+(state.settings[k]?' on':'');
+  }
+  document.getElementById('sb-url').value=state.supabase.url||'';
+  document.getElementById('sb-key').value=state.supabase.key||'';
+  document.getElementById('sb-user').value=state.supabase.user||'';
+}
+
+function saveSettings(){
+  state.supabase.url=document.getElementById('sb-url').value.trim();
+  state.supabase.key=document.getElementById('sb-key').value.trim();
+  state.supabase.user=document.getElementById('sb-user').value.trim();
+  localStorage.setItem('fiocco_settings',JSON.stringify({settings:state.settings,supabase:state.supabase}));
+  showToast('Impostazioni salvate! 🐰');
+  syncToSupabase();
+}
+
+function resetGame(){
+  if(!confirm('Sei sicura? Tutti i progressi saranno cancellati.')) return;
+  localStorage.removeItem('fiocco_v1');
+  gameState.lives=5; gameState.currentLevelNum=1;
+  gameState.levelStars={}; gameState.levelBest={};
+  showToast('Progressi resettati. Buona avventura! 🐰');
+}
+
+// ── INTRO ────────────────────────────────────────────────────
+let introSlide=0;
+function introNext(){
+  introSlide++;
+  if(introSlide>=4){ showScreen('menu'); return; }
+  document.querySelectorAll('.intro-slide').forEach((s,i)=>{
+    s.className='intro-slide'+(i===introSlide?' active':'');
+  });
+  document.querySelectorAll('.intro-dot').forEach((d,i)=>{
+    d.className='intro-dot'+(i===introSlide?' active':'');
+  });
+  if(introSlide===3) document.getElementById('btn-intro-next').textContent='Inizia! 🐰';
+}
+function skipIntro(){ showScreen('menu'); }
+
+// ── HAPTIC ────────────────────────────────────────────────────
+function haptic(){
+  if(settings.haptic&&navigator.vibrate) navigator.vibrate(50);
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+let toastTimer=null;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+// ── UTILS ────────────────────────────────────────────────────
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+// ── LOADING SEQUENCE ──────────────────────────────────────────
+const LOADING_MESSAGES=[
+  'Preparando i gomitoli...',
+  'Svegliando Fiocco...',
+  'Dipingendo il prato...',
+  'Annodando i fili magici...',
+  'Contando le stelle...',
+  'Quasi pronto!',
+];
+
+function startLoading(){
+  loadState();
+  const bar=document.getElementById('loading-bar');
+  const txt=document.getElementById('loading-text');
+  let p=0;
+  const interval=setInterval(()=>{
+    p+=Math.random()*18+5;
+    if(p>100) p=100;
+    bar.style.width=p+'%';
+    txt.textContent=LOADING_MESSAGES[Math.min(Math.floor(p/17),LOADING_MESSAGES.length-1)];
+    if(p>=100){
+      clearInterval(interval);
+      setTimeout(()=>{
+        const hasPlayed=localStorage.getItem('fiocco_intro');
+        if(!hasPlayed){
+          localStorage.setItem('fiocco_intro','1');
+          showScreen('intro');
+        } else {
+          showScreen('menu');
+        }
+      },400);
+    }
+  },120);
+}
+
+// ── HANDLE RESIZE ─────────────────────────────────────────────
+window.addEventListener('resize',()=>{
+  if(document.getElementById('screen-game').classList.contains('active')&&gameState.level&&!gameState.animating){
+    requestAnimationFrame(()=>{
+      CELL_SIZE=calcCellSize();
+      rerenderBoard();
+    });
+  }
+});
+
+function startRandomWobble(){
+  if(!gameState.level||gameState.animating) return;
+  const size=gameState.level.boardSize;
+  if(!size) return;
+  const r=Math.floor(Math.random()*size);
+  const c=Math.floor(Math.random()*size);
+  const cell=gameState.board[r][c];
+  if(!cell||!cell.type||cell.blocker) return;
+  const el=getGemEl(r,c);
+  if(el&&!el.classList.contains('wobbling')){
+    el.classList.add('wobbling');
+    setTimeout(()=>el&&el.classList.remove('wobbling'),500);
+  }
+}
+setInterval(startRandomWobble, 1800);
+
+startLoading();
+</script>
+</body>
+</html>
