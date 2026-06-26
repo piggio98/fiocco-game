@@ -150,7 +150,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .obj-progress{width:60px;height:5px;background:rgba(0,0,0,0.1);border-radius:3px;overflow:hidden;}
 .obj-progress-fill{height:100%;background:linear-gradient(90deg,var(--pink2),var(--pink3));border-radius:3px;transition:width 0.3s;}
 
-.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;padding:4px 8px;position:relative;}
+.board-wrap{flex:1;display:flex;align-items:flex-start;justify-content:center;width:100%;padding:4px 8px 4px;position:relative;}
 #board{position:relative;border-radius:20px;background:var(--board-bg);box-shadow:0 8px 30px rgba(0,0,0,0.12),inset 0 2px 8px rgba(255,200,200,0.3);overflow:hidden;}
 #board::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent calc(12.5% - 1px),var(--cell-border) calc(12.5% - 1px),var(--cell-border) 12.5%),repeating-linear-gradient(90deg,transparent,transparent calc(12.5% - 1px),var(--cell-border) calc(12.5% - 1px),var(--cell-border) 12.5%);pointer-events:none;z-index:5;}
 
@@ -479,6 +479,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   <div class="worldmap-header">
     <button class="btn-back" onclick="showScreen('menu')">←</button>
     <span class="worldmap-title">🗺️ Mappa del Bosco</span>
+    <div class="worldmap-lives">🪙 <span id="wm-coins">0</span></div>
     <div class="worldmap-lives">❤️ <span id="wm-lives">5</span></div>
   </div>
   <div class="worldmap-scroll" id="worldmap-scroll">
@@ -515,9 +516,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
       <div class="game-score-lbl">PUNTI</div>
       <div class="game-score-val" id="game-score">0</div>
     </div>
-    <div class="game-moves-box">
+    <div class="game-moves-box" style="min-width:46px">
       <div class="game-moves-val" id="game-moves">25</div>
       <div class="game-moves-lbl">MOSSE</div>
+    </div>
+    <div class="game-moves-box" style="min-width:46px;color:#e6b800">
+      <div class="game-moves-val" id="game-coins" style="font-size:1rem">🪙0</div>
+      <div class="game-moves-lbl">MONETE</div>
     </div>
   </div>
   <div class="game-objectives" id="game-objectives"></div>
@@ -571,7 +576,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
       <div class="shop-rabbit">🐰🧶</div>
       <div class="shop-title">Cosa vuoi comprare?</div>
     </div>
-    <div class="lives-current">❤️ Vite attuali: <span id="shop-lives-count">5</span> / 5</div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div class="lives-current" style="flex:1">❤️ Vite: <span id="shop-lives-count">5</span>/5</div>
+      <div class="lives-current" style="flex:1;color:#e6b800">🪙 <span id="shop-coins">0</span></div>
+    </div>
     <div class="shop-card">
       <div class="shop-card-icon">❤️</div>
       <div class="shop-card-info">
@@ -584,17 +592,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
       <div class="shop-card-icon">⚡</div>
       <div class="shop-card-info">
         <div class="shop-card-name">Mossa Extra</div>
-        <div class="shop-card-desc">+5 mosse per il livello attuale. (Prossimamente)</div>
+        <div class="shop-card-desc">+5 mosse per il livello attuale. Funziona solo durante il gioco!</div>
       </div>
-      <button class="btn-buy" style="opacity:0.5">Presto</button>
+      <button class="btn-buy" id="btn-buy-moves" onclick="buyExtraMoves()">🪙 30</button>
     </div>
     <div class="shop-card">
       <div class="shop-card-icon">🌈</div>
       <div class="shop-card-info">
         <div class="shop-card-name">Gomitolo Arcobaleno</div>
-        <div class="shop-card-desc">Un gomitolo speciale che elimina tutto un colore. (Prossimamente)</div>
+        <div class="shop-card-desc">Piazza un arcobaleno magico sul tabellone. Solo durante il gioco!</div>
       </div>
-      <button class="btn-buy" style="opacity:0.5">Presto</button>
+      <button class="btn-buy" id="btn-buy-rainbow" onclick="buyRainbow()">🪙 50</button>
+    </div>
+    <div class="shop-card">
+      <div class="shop-card-icon">🪙</div>
+      <div class="shop-card-info">
+        <div class="shop-card-name">Sacchetto di Monete</div>
+        <div class="shop-card-desc">+100 monete gratis da usare nel negozio! 🎁</div>
+      </div>
+      <button class="btn-buy" onclick="buyCoins()">GRATIS!</button>
     </div>
   </div>
 </div>
@@ -670,6 +686,69 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 
 // ── AUDIO ENGINE ────────────────────────────────────────────
 let audioCtx = null;
+
+// ── BACKGROUND MUSIC ─────────────────────────────────────────
+let bgMusicNodes = null;
+let bgMusicScheduled = false;
+
+function startBgMusic(){
+  if(!settings.music) return;
+  if(bgMusicNodes) return; // già in esecuzione
+  const ctx = getAudio(); if(!ctx) return;
+  // Pentatonica Do maggiore: C4 D4 E4 G4 A4 C5 D5 E5 G5 A5
+  const notes = [261,294,329,392,440, 523,587,659,784,880];
+  // Melodia semplice: pattern ripetuto
+  const melody = [0,2,4,2,5,4,2,0, 1,3,5,3,6,5,3,1, 4,6,7,6,4,2,0,2];
+  const beatLen = 0.38;
+  // Reverb semplice con delay
+  const masterGain = ctx.createGain();
+  masterGain.gain.setValueAtTime(0.08, ctx.currentTime);
+  masterGain.connect(ctx.destination);
+
+  let nextBeat = ctx.currentTime + 0.1;
+  let patIdx = 0;
+
+  function scheduleMelody(){
+    if(!settings.music){ stopBgMusic(); return; }
+    // Pianifica 8 note alla volta
+    for(let i=0; i<8; i++){
+      const freq = notes[melody[patIdx % melody.length]];
+      const t = nextBeat + i*beatLen;
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.connect(g); g.connect(masterGain);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.7, t+0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, t+beatLen*0.8);
+      osc.start(t); osc.stop(t+beatLen);
+      patIdx++;
+    }
+    // Basso ogni 4 battiti
+    const bassFreq = notes[melody[Math.floor(patIdx/4) % melody.length]] / 2;
+    const bt = nextBeat;
+    const bo = ctx.createOscillator();
+    const bg2 = ctx.createGain();
+    bo.connect(bg2); bg2.connect(masterGain);
+    bo.type = 'triangle'; bo.frequency.setValueAtTime(bassFreq, bt);
+    bg2.gain.setValueAtTime(0, bt);
+    bg2.gain.linearRampToValueAtTime(0.5, bt+0.08);
+    bg2.gain.exponentialRampToValueAtTime(0.001, bt+beatLen*2);
+    bo.start(bt); bo.stop(bt+beatLen*2);
+
+    nextBeat += 8*beatLen;
+    bgMusicNodes = setTimeout(scheduleMelody, (nextBeat - ctx.currentTime - 0.5)*1000);
+  }
+  scheduleMelody();
+}
+
+function stopBgMusic(){
+  if(bgMusicNodes){ clearTimeout(bgMusicNodes); bgMusicNodes=null; }
+}
+function toggleBgMusic(){
+  if(settings.music) startBgMusic(); else stopBgMusic();
+}
 function getAudio(){
   if(!audioCtx){
     try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
@@ -764,6 +843,7 @@ function saveState(){
     currentLevelNum: gameState.currentLevelNum,
     levelStars: gameState.levelStars,
     levelBest: gameState.levelBest,
+    coins: gameState.coins,
   }));
   localStorage.setItem('fiocco_settings', JSON.stringify({
     settings: state.settings,
@@ -780,6 +860,7 @@ function loadState(){
     gameState.currentLevelNum = d.currentLevelNum ?? 1;
     gameState.levelStars = d.levelStars ?? {};
     gameState.levelBest = d.levelBest ?? {};
+    gameState.coins = d.coins ?? 0;
   }
   const rawS = localStorage.getItem('fiocco_settings');
   if(rawS){
@@ -797,6 +878,7 @@ const gameState = {
   currentLevelNum: 1,
   levelStars: {},
   levelBest: {},
+  coins: 0,
   // in-game
   level: null,
   board: [],      // [row][col] = {type, special, blocker, hp}
@@ -807,6 +889,7 @@ const gameState = {
   animating: false,
   objectives: {}, // objective state
   paused: false,
+  _tutorialPaused: false,
 };
 
 // ── LEVEL DEFINITIONS ────────────────────────────────────────
@@ -1131,7 +1214,10 @@ let CELL_SIZE = 44;
 function calcCellSize(){
   const wrap = document.querySelector('.board-wrap');
   if(!wrap) return 44;
-  const available = Math.min(wrap.clientWidth-16, wrap.clientHeight-16);
+  // Su portrait mobile usa tutta la larghezza; limita anche altezza per non uscire
+  const maxW = wrap.clientWidth - 16;
+  const maxH = wrap.clientHeight - 8;
+  const available = Math.min(maxW, maxH);
   const size = gameState.level?.boardSize||8;
   return Math.floor(available/size);
 }
@@ -1596,9 +1682,10 @@ async function processMatches(matches){
   const board=gameState.board;
   const groups=getMatchGroups(board,size,matches);
 
-  // Score
+  // Score + monete
   let matchScore=0;
   for(const g of groups) matchScore+=g.length*100*gameState.combo;
+  gameState.coins += matches.size; // 1 moneta per gem eliminato
 
   // Obiettivi
   for(const key of matches){
@@ -1811,6 +1898,7 @@ function updateHUD(){
   document.getElementById('game-score').textContent=gameState.score.toLocaleString('it');
   document.getElementById('game-moves').textContent=gameState.moves;
   updateObjectivesUI();
+  updateCoinsUI();
 }
 
 // ── VISUAL FX ────────────────────────────────────────────────
@@ -1932,6 +2020,7 @@ function showWin(){
     if(num===gameState.currentLevelNum) gameState.currentLevelNum=Math.min(100,num+1);
   }
   if(!gameState.levelBest[num]||score>gameState.levelBest[num]) gameState.levelBest[num]=score;
+  gameState.coins += Math.floor(score/500); // bonus monete a fine livello
   saveState();
 
   document.getElementById('win-level-text').textContent=`Livello ${num} completato!`;
@@ -1996,10 +2085,20 @@ setInterval(()=>{ regenLives(); updateLivesUI(); },10000);
 
 function updateLivesUI(){
   regenLives();
-  const hearts='❤️'.repeat(gameState.lives)+'🖤'.repeat(Math.max(0,MAX_LIVES-gameState.lives));
   document.getElementById('menu-lives-count').textContent=gameState.lives;
   document.getElementById('wm-lives').textContent=gameState.lives;
   document.getElementById('shop-lives-count').textContent=gameState.lives+'/'+MAX_LIVES;
+}
+
+function checkDailyBonus(){
+  const key='fiocco_daily';
+  const today=new Date().toDateString();
+  const last=localStorage.getItem(key);
+  if(last===today) return;
+  localStorage.setItem(key, today);
+  gameState.coins += 20;
+  saveState();
+  setTimeout(()=>showToast('🌟 Bonus giornaliero: +20 monete! Torna domani per altre! 🐰'), 2000);
 }
 
 // ── SUPABASE SYNC ─────────────────────────────────────────────
@@ -2033,8 +2132,9 @@ function showScreen(name){
   const el=document.getElementById('screen-'+name);
   if(el) el.classList.add('active');
   gameState.screen=name;
-  if(name==='menu') updateLivesUI();
-  if(name==='shop') updateLivesUI();
+  if(name==='menu'){ updateLivesUI(); startBgMusic(); }
+  if(name==='shop'){ updateLivesUI(); updateCoinsUI(); }
+  if(name==='worldmap') updateCoinsUI();
   if(name==='settings') loadSettingsUI();
 }
 
@@ -2199,11 +2299,89 @@ function buyLives(){
   haptic();
 }
 
+function buyCoins(){
+  const seen = JSON.parse(localStorage.getItem('fiocco_coin_gift')||'[]');
+  const today = new Date().toDateString();
+  if(seen.includes(today)){
+    showToast('🪙 Già riscattato oggi! Torna domani per altre monete!');
+    return;
+  }
+  seen.push(today);
+  localStorage.setItem('fiocco_coin_gift', JSON.stringify(seen.slice(-7)));
+  SFX.buy();
+  gameState.coins += 100;
+  saveState();
+  updateCoinsUI();
+  showToast('🪙 +100 monete! Usale nel negozio!');
+  haptic();
+}
+
+function buyExtraMoves(){
+  if(!gameState.level || !document.getElementById('screen-game').classList.contains('active')){
+    showToast('⚡ Devi essere in gioco per usare questa! 🐰');
+    return;
+  }
+  if(gameState.coins < 30){
+    showToast('🪙 Non hai abbastanza monete! Ne servono 30.');
+    return;
+  }
+  SFX.buy();
+  gameState.coins -= 30;
+  gameState.moves += 5;
+  saveState();
+  updateHUD();
+  updateCoinsUI();
+  showToast('⚡ +5 mosse! Forza Fiocco!');
+  haptic();
+}
+
+function buyRainbow(){
+  if(!gameState.level || !document.getElementById('screen-game').classList.contains('active')){
+    showToast('🌈 Devi essere in gioco per usare questa! 🐰');
+    return;
+  }
+  if(gameState.coins < 50){
+    showToast('🪙 Non hai abbastanza monete! Ne servono 50.');
+    return;
+  }
+  const board = gameState.board;
+  const size = gameState.level.boardSize;
+  // Trova cella libera (no blocker, no special)
+  const free = [];
+  for(let r=0;r<size;r++) for(let c=0;c<size;c++){
+    const cell=board[r][c];
+    if(cell.type && !cell.blocker && !cell.special) free.push({r,c});
+  }
+  if(!free.length){ showToast('Non c\'è spazio per l\'arcobaleno!'); return; }
+  SFX.buy();
+  gameState.coins -= 50;
+  saveState();
+  const pos = free[Math.floor(Math.random()*free.length)];
+  board[pos.r][pos.c].special = 'rainbow';
+  updateGemEl(pos.r, pos.c);
+  updateHUD();
+  updateCoinsUI();
+  showToast('🌈 Gomitolo arcobaleno piazzato!');
+  SFX.rainbow();
+  haptic();
+}
+
+function updateCoinsUI(){
+  const v = gameState.coins;
+  const el = document.getElementById('game-coins');
+  if(el) el.textContent = '🪙'+v;
+  const sc = document.getElementById('shop-coins');
+  if(sc) sc.textContent = v;
+  const wmc = document.getElementById('wm-coins');
+  if(wmc) wmc.textContent = v;
+}
+
 // ── SETTINGS ─────────────────────────────────────────────────
 function toggleSetting(key){
   state.settings[key]=!state.settings[key];
   settings=state.settings;
   document.getElementById('toggle-'+key).className='toggle'+(state.settings[key]?' on':'');
+  if(key==='music') toggleBgMusic();
 }
 
 function loadSettingsUI(){
@@ -2525,6 +2703,7 @@ const LOADING_MESSAGES=[
 
 function startLoading(){
   loadState();
+  checkDailyBonus();
   const bar=document.getElementById('loading-bar');
   const txt=document.getElementById('loading-text');
   let p=0;
