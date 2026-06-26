@@ -342,9 +342,79 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 
 /* ── RESPONSIVE ─────────────────────────────────────────── */
 @media(max-width:360px){.menu-title{font-size:1.8rem;}.win-title{font-size:1.8rem;}}
+
+/* ── TUTORIAL OVERLAY ───────────────────────────────────────── */
+#tutorial-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center;z-index:600;padding:20px;}
+#tutorial-overlay.active{display:flex;animation:fadeInBg 0.3s ease;}
+@keyframes fadeInBg{from{opacity:0;}to{opacity:1;}}
+.tutorial-card{background:linear-gradient(160deg,#fff8f0,#fce4ec);border-radius:28px;padding:0 0 24px;max-width:340px;width:100%;box-shadow:0 16px 48px rgba(0,0,0,0.35);overflow:hidden;animation:tutorialPop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes tutorialPop{from{transform:scale(0.6) translateY(40px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+.tutorial-banner{height:140px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.tutorial-banner-art{font-size:3.2rem;display:flex;gap:6px;align-items:center;position:relative;z-index:2;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.2));}
+.tutorial-banner-art span{display:inline-block;animation:tutArtBounce 0.8s ease-in-out infinite;}
+.tutorial-banner-art span:nth-child(2){animation-delay:0.15s;}
+.tutorial-banner-art span:nth-child(3){animation-delay:0.3s;}
+@keyframes tutArtBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.tutorial-title{font-size:1.35rem;font-weight:900;color:var(--pink3);text-align:center;padding:16px 24px 0;line-height:1.2;}
+.tutorial-badge{display:block;background:linear-gradient(135deg,var(--pink2),var(--purple2));color:white;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:20px;margin:8px auto 0;width:fit-content;}
+.tutorial-desc{font-size:0.92rem;color:var(--text);text-align:center;line-height:1.65;padding:12px 24px 0;max-width:300px;margin:0 auto;}
+.tutorial-tip{background:rgba(255,255,255,0.7);border-left:4px solid var(--pink2);border-radius:0 12px 12px 0;padding:10px 14px;margin:14px 20px 0;font-size:0.82rem;color:var(--text2);font-style:italic;}
+.btn-tutorial-ok{display:block;margin:18px 24px 0;background:linear-gradient(135deg,var(--pink2),var(--pink3));color:white;border:none;padding:14px;border-radius:var(--btn-r);font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,77,109,0.4);width:calc(100% - 48px);text-align:center;}
+.btn-tutorial-ok:active{transform:scale(0.95);}
+
+/* ── CUTSCENE OVERLAY ───────────────────────────────────────── */
+#cutscene-overlay{position:fixed;inset:0;display:none;flex-direction:column;z-index:500;}
+#cutscene-overlay.active{display:flex;}
+.cutscene-bg{position:absolute;inset:0;transition:background 0.8s ease;}
+.cutscene-content{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.cutscene-panel{display:none;flex-direction:column;align-items:center;width:100%;max-width:360px;animation:cutPanelIn 0.5s cubic-bezier(0.34,1.2,0.64,1);}
+.cutscene-panel.active{display:flex;}
+@keyframes cutPanelIn{from{opacity:0;transform:translateX(60px);}to{opacity:1;transform:translateX(0);}}
+.cutscene-scene{width:100%;height:220px;border-radius:24px;background:rgba(255,255,255,0.25);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.15);}
+.cut-chars{font-size:2.8rem;display:flex;gap:8px;align-items:flex-end;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.2));}
+.cut-chars .bunny{animation:bunnyHop 0.7s ease-in-out infinite;}
+@keyframes bunnyHop{0%,100%{transform:translateY(0) rotate(0deg);}40%{transform:translateY(-18px) rotate(-5deg);}70%{transform:translateY(-8px) rotate(3deg);}}
+.cut-chars .item{animation:itemFloat 1.2s ease-in-out infinite;}
+@keyframes itemFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.cut-bg-deco{position:absolute;inset:0;font-size:1.8rem;opacity:0.22;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;pointer-events:none;}
+.cutscene-dialog{width:100%;background:rgba(255,255,255,0.92);border-radius:20px;padding:18px 20px;margin-top:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+.cutscene-speaker{font-size:0.75rem;font-weight:800;color:var(--pink3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.cutscene-text{font-size:0.97rem;color:var(--text);line-height:1.65;}
+.cutscene-nav{position:fixed;bottom:env(safe-area-inset-bottom,24px);left:0;right:0;display:flex;justify-content:center;align-items:center;gap:16px;padding:0 24px;z-index:3;}
+.cut-dots{display:flex;gap:8px;}
+.cut-dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.4);transition:all 0.3s;}
+.cut-dot.active{background:white;transform:scale(1.3);}
+.btn-cut-next{background:rgba(255,255,255,0.9);border:none;padding:12px 28px;border-radius:var(--btn-r);font-size:1rem;font-weight:700;color:var(--pink3);cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.15);}
+.btn-cut-next:active{transform:scale(0.94);}
+.btn-cut-skip{position:fixed;top:env(safe-area-inset-top,16px);right:16px;background:rgba(255,255,255,0.5);border:none;padding:8px 16px;border-radius:20px;font-size:0.8rem;color:white;cursor:pointer;font-weight:600;z-index:3;}
 </style>
 </head>
 <body>
+
+<!-- TUTORIAL OVERLAY -->
+<div id="tutorial-overlay">
+  <div class="tutorial-card" id="tutorial-card">
+    <div class="tutorial-banner" id="tutorial-banner"></div>
+    <div class="tutorial-title" id="tutorial-title"></div>
+    <div class="tutorial-badge" id="tutorial-badge"></div>
+    <div class="tutorial-desc" id="tutorial-desc"></div>
+    <div class="tutorial-tip" id="tutorial-tip"></div>
+    <button class="btn-tutorial-ok" onclick="closeTutorial()">🐰 Ho capito!</button>
+  </div>
+</div>
+
+<!-- CUTSCENE OVERLAY -->
+<div id="cutscene-overlay">
+  <div class="cutscene-bg" id="cutscene-bg"></div>
+  <button class="btn-cut-skip" onclick="closeCutscene()">Salta ›</button>
+  <div class="cutscene-content" id="cutscene-content">
+    <!-- panels injected dynamically -->
+  </div>
+  <div class="cutscene-nav">
+    <div class="cut-dots" id="cut-dots"></div>
+    <button class="btn-cut-next" id="btn-cut-next" onclick="cutsceneNext()">Avanti →</button>
+  </div>
+</div>
 
 <!-- LOADING -->
 <div class="screen active" id="screen-loading">
@@ -1087,33 +1157,33 @@ function createGemEl(r,c){
   if(!cell) return;
   const el = document.createElement('div');
   el.className = buildGemClass(cell);
-  const sz = Math.floor(CELL_SIZE*0.88);
   el.style.cssText = gemStyle(r,c);
   el.dataset.r = r; el.dataset.c = c;
 
-  // ── Applica sprite ────────────────────────────────────────
-  if(cell.blocker === 'ice'){
-    const iceData = cell.hp > 1 ? ICE_SPRITE_DATA.intact : ICE_SPRITE_DATA.cracked;
-    el.style.cssText += spriteBg(iceData, sz);
-    el.classList.add('gem-sprite');
-  } else if(cell.blocker === 'stone'){
+  if(cell.blocker === 'stone'){
     const s = document.createElement('div');
     s.className = 'gem-stone-sym'; s.textContent = '🪨';
     el.appendChild(s);
-  } else if(cell.special && SPECIAL_SPRITE_DATA[cell.special]){
-    el.style.cssText += spriteBg(SPECIAL_SPRITE_DATA[cell.special], sz);
-    el.classList.add('gem-sprite');
-    if(cell.special==='stripe-h'||cell.special==='stripe-v'){
-      const bar=document.createElement('div'); bar.className='gem-stripe-bar'; el.appendChild(bar);
-    }
-  } else if(cell.type && GEM_SPRITE_DATA[cell.type]){
-    el.style.cssText += spriteBg(GEM_SPRITE_DATA[cell.type], sz);
-    el.classList.add('gem-sprite');
+  } else if(cell.blocker === 'ice'){
+    const sym = document.createElement('div');
+    sym.className = 'gem-ice-sym';
+    sym.textContent = cell.hp > 1 ? '🧊' : '❄️';
+    el.appendChild(sym);
   } else if(cell.type){
     const sym = document.createElement('span');
     sym.className = 'gem-sym';
     sym.textContent = GEM_SYMBOLS[cell.type] || '';
     el.appendChild(sym);
+    // Overlay speciali
+    if(cell.special==='stripe-h'||cell.special==='stripe-v'){
+      const bar=document.createElement('div'); bar.className='gem-stripe-bar'; el.appendChild(bar);
+    } else if(cell.special==='bomb'){
+      const star=document.createElement('div'); star.className='gem-bomb-star'; star.textContent='✸'; el.appendChild(star);
+    } else if(cell.special==='rainbow'){
+      const crown=document.createElement('div'); crown.className='gem-rainbow-crown'; crown.textContent='👑'; el.appendChild(crown);
+    } else if(cell.special==='superbomb'){
+      const icon=document.createElement('div'); icon.className='gem-superbomb-icon'; icon.textContent='🧶'; el.appendChild(icon);
+    }
   }
 
   BOARD_EL().appendChild(el);
@@ -1431,6 +1501,7 @@ async function process2x2(sq){
   for(const {r,c} of cells) board[r][c]={type:0,special:null,blocker:null,hp:0};
   // Piazza superbomb al centro-alto del quadrato
   board[cr][cc]={type:sq.t,special:'superbomb',blocker:null,hp:0};
+  setTimeout(()=>queueTutorial('superbomb'),600);
   const pts=500*Math.max(1,gameState.combo);
   gameState.score+=pts;
   showScorePopup(pts);
@@ -1578,6 +1649,10 @@ async function processMatches(matches){
     if(newSpecialMap.has(key)){
       const {sp,gemType}=newSpecialMap.get(key);
       board[r][c]={type:gemType,special:sp,blocker:null,hp:0};
+      // Tutorial gem speciali
+      if(sp==='stripe-h'||sp==='stripe-v') setTimeout(()=>queueTutorial('stripe'),600);
+      else if(sp==='bomb') setTimeout(()=>queueTutorial('bomb'),600);
+      else if(sp==='rainbow') setTimeout(()=>queueTutorial('rainbow'),600);
       continue;
     }
     if(cell.blocker==='ice'){
@@ -1871,6 +1946,12 @@ function showWin(){
   setTimeout(()=>{ s1.classList.add('earned'); },300);
   if(stars>=2) setTimeout(()=>{ s2.classList.add('earned'); },600);
   if(stars>=3) setTimeout(()=>{ s3.classList.add('earned'); },900);
+  // Cutscene dopo livelli chiave (con delay per godersi la schermata di vittoria)
+  if(CUTSCENES[num]){
+    setTimeout(()=>{
+      checkAndShowCutscene(num, null);
+    }, 1800);
+  }
 }
 
 function showLose(){
@@ -2072,6 +2153,11 @@ function startLevel(){
       renderBoard();
       renderObjectives();
       updateHUD();
+      // Tutorial contestuali per meccaniche nuove
+      const lv = level;
+      if(lv.id===1) setTimeout(()=>queueTutorial('match3'), 800);
+      if(lv.id===8) setTimeout(()=>queueTutorial('ice'), 800);
+      if(lv.id>=40 && lv.blockers && lv.blockers.some(b=>b.type==='stone')) setTimeout(()=>queueTutorial('stone'), 800);
       setTimeout(checkHints,3000);
     });
   });
@@ -2178,6 +2264,254 @@ function showToast(msg){
 
 // ── UTILS ────────────────────────────────────────────────────
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+// ── TUTORIAL SYSTEM ──────────────────────────────────────────
+const TUTORIALS = {
+  match3: {
+    title: 'Come si gioca!',
+    badge: '🌟 Nuovo!',
+    bannerBg: 'linear-gradient(135deg,#ffd6e0,#ffb3c6)',
+    art: ['🧶','🧶','🧶'],
+    desc: 'Scorri il dito su un gomitolo e trascinalo vicino ad un altro dello stesso colore! Allinea <strong>3 o più</strong> gomitoli uguali per raccoglierli.',
+    tip: '💡 Più gomitoli allinei in una sola mossa, più punti guadagni!'
+  },
+  ice: {
+    title: 'Blocchi di Ghiaccio!',
+    badge: '❄️ Novità al livello 8',
+    bannerBg: 'linear-gradient(135deg,#c8e8ff,#9fd8fa)',
+    art: ['❄️','🧊','💎'],
+    desc: 'Il <strong>Vento Burlone</strong> ha congelato alcuni gomitoli! I blocchi di ghiaccio non si possono spostare, ma basta fare un match vicino a loro per romperli. Dopo due colpi, si sciolgono!',
+    tip: '💡 Il primo colpo incrina il ghiaccio, il secondo lo rompe del tutto!'
+  },
+  stone: {
+    title: 'Rocce Incantate!',
+    badge: '🪨 Solo i più bravi',
+    bannerBg: 'linear-gradient(135deg,#c8c8c8,#888)',
+    art: ['🪨','💪','⚡'],
+    desc: 'Queste <strong>rocce magiche</strong> del bosco sono indistruttibili! Non puoi eliminarle, ma puoi giocare intorno a loro. Usa gli speciali per liberare la strada!',
+    tip: '💡 Le bombe e le strisce possono saltarci sopra!'
+  },
+  stripe: {
+    title: 'Gomitolo a Strisce!',
+    badge: '✨ Speciale creato!',
+    bannerBg: 'linear-gradient(135deg,#fff3b0,#ffe066)',
+    art: ['✨','🎀','⚡'],
+    desc: 'Brava! Allineando <strong>4 gomitoli</strong> in fila crei un gomitolo a strisce! Se la linea era orizzontale, elimina tutta la riga. Se era verticale, elimina tutta la colonna!',
+    tip: '💡 Swippa due strisce insieme per una doppia esplosione!'
+  },
+  bomb: {
+    title: 'Gomitolo Bomba!',
+    badge: '💥 Boooom!',
+    bannerBg: 'linear-gradient(135deg,#ffd8a8,#ffb347)',
+    art: ['💥','🧶','⭐'],
+    desc: 'Un <strong>gomitolo bomba</strong>! Si crea allineando 5 gomitoli ad L o a T. Quando esplode, elimina tutti i gomitoli in un raggio di 3×3 attorno a lui!',
+    tip: '💡 Swippa una bomba con un\'altra per una mega esplosione 5×5!'
+  },
+  rainbow: {
+    title: 'Gomitolo Arcobaleno!',
+    badge: '🌈 Magia pura!',
+    bannerBg: 'linear-gradient(135deg,#e8d0ff,#c084fc)',
+    art: ['🌈','👑','✨'],
+    desc: 'Il <strong>gomitolo arcobaleno</strong> è il più potente! Si crea allineando 5 gomitoli in linea retta. Swippalo su qualsiasi colore e elimina <em>tutti</em> i gomitoli di quel colore dal tabellone!',
+    tip: '💡 Swippa l\'arcobaleno su un altro speciale per effetti combinati!'
+  },
+  superbomb: {
+    title: 'Super Bomba!',
+    badge: '🧶 MEGA POTERE!',
+    bannerBg: 'linear-gradient(135deg,#ffd6e0,#ce93d8)',
+    art: ['🧶','💫','🌪️'],
+    desc: 'La <strong>Super Bomba di Lana</strong>! Si crea quando 4 gomitoli dello stesso colore formano un quadrato 2×2. Quando esplode, fa saltare in aria un\'area enorme 5×5!',
+    tip: '💡 La super bomba è l\'arma segreta di Fiocco contro il Vento Burlone!'
+  },
+};
+
+let tutorialQueue = [];
+let tutorialActive = false;
+
+function getTutorialsSeen(){
+  try{ return JSON.parse(localStorage.getItem('fiocco_tuts')||'[]'); }catch(e){ return []; }
+}
+function markTutorialSeen(key){
+  const seen = getTutorialsSeen();
+  if(!seen.includes(key)){ seen.push(key); localStorage.setItem('fiocco_tuts',JSON.stringify(seen)); }
+}
+function queueTutorial(key){
+  const seen = getTutorialsSeen();
+  if(seen.includes(key)) return;
+  if(!tutorialQueue.includes(key)) tutorialQueue.push(key);
+  if(!tutorialActive) showNextTutorial();
+}
+function showNextTutorial(){
+  if(tutorialQueue.length===0){ tutorialActive=false; return; }
+  const key = tutorialQueue.shift();
+  const data = TUTORIALS[key];
+  if(!data){ showNextTutorial(); return; }
+  tutorialActive = true;
+  markTutorialSeen(key);
+
+  const ov = document.getElementById('tutorial-overlay');
+  const banner = document.getElementById('tutorial-banner');
+  const title = document.getElementById('tutorial-title');
+  const badge = document.getElementById('tutorial-badge');
+  const desc = document.getElementById('tutorial-desc');
+  const tip = document.getElementById('tutorial-tip');
+
+  banner.style.background = data.bannerBg;
+  banner.innerHTML = `<div class="tutorial-banner-art">${data.art.map(a=>`<span>${a}</span>`).join('')}</div>`;
+  title.textContent = data.title;
+  badge.textContent = data.badge;
+  desc.innerHTML = data.desc;
+  tip.textContent = data.tip;
+
+  // Pause game if playing
+  if(gameState.level && !gameState.paused && document.getElementById('screen-game').classList.contains('active')){
+    gameState._tutorialPaused = true;
+    gameState.paused = true;
+  }
+  ov.classList.add('active');
+}
+function closeTutorial(){
+  document.getElementById('tutorial-overlay').classList.remove('active');
+  if(gameState._tutorialPaused){ gameState.paused=false; gameState._tutorialPaused=false; }
+  tutorialActive = false;
+  setTimeout(showNextTutorial, 300);
+}
+
+// ── CUTSCENE SYSTEM ──────────────────────────────────────────
+const CUTSCENES = {
+  // Chiave = livello dopo cui si mostra
+  5: {
+    bg: 'linear-gradient(160deg,#fce4ec,#f8bbd9,#ffd6e0)',
+    panels: [
+      { chars:'🐰🌸', items:'🧶✨', deco:'🌸🌺🌼🌷🌸', speaker:'🐰 Fiocco', text:'Ce l\'ho fatta! Ho trovato tutti i gomitoli del Prato Fiorito! Erano nascosti tra i fiori colorati.' },
+      { chars:'🐰😊', items:'🧶🌈', deco:'⭐💫✨🌟⭐', speaker:'🐰 Fiocco', text:'Ma il Vento Burlone ne ha dispersi ancora tanti... Il Giardino Segreto mi aspetta! Avanti, senza paura!' },
+    ]
+  },
+  10: {
+    bg: 'linear-gradient(160deg,#e8f5e9,#c8e6c9,#a5d6a7)',
+    panels: [
+      { chars:'🐰🌿', items:'🗝️✨', deco:'🌿🍃🌱🍀🌿', speaker:'🐰 Fiocco', text:'Eccolo! Il Giardino Segreto! Qui le piante parlano e i fiori cantano filastrocche di lana.' },
+      { chars:'🧝🐰', items:'🪡💚', deco:'🌺🌸🌼🍃💫', speaker:'🧝 Fata Verde', text:'Benvenuta, coniglietta! Io sono la Fata Verde. Guarda, ho trovato questi gomitoli per te!' },
+      { chars:'🐰🎀', items:'🧶🌟', deco:'🌿✨🍀🌺💫', speaker:'🐰 Fiocco', text:'Grazie, cara Fata! Con questi sono più vicina a sconfiggere il Vento Burlone. Il Bosco dei Sogni mi chiama!' },
+    ]
+  },
+  15: {
+    bg: 'linear-gradient(160deg,#e3f2fd,#bbdefb,#90caf9)',
+    panels: [
+      { chars:'🐰🌙', items:'💫⭐', deco:'🌙⭐💫✨🌟', speaker:'🐰 Fiocco', text:'Il Bosco dei Sogni... è meraviglioso! Gli alberi brillano di notte e i gomitoli galleggiano nell\'aria!' },
+      { chars:'🦉🐰', items:'📚🪡', deco:'🌲🌳🍄💫🌙', speaker:'🦉 Gufo Saggio', text:'Fermati, piccola! Sono il Gufo Saggio. Per superare il Bosco, devi imparare la Tecnica delle Cinque Strisce!' },
+      { chars:'🐰✊', items:'🧶⚡', deco:'✨💫🌟⭐✨', speaker:'🐰 Fiocco', text:'Ho imparato tutto! Con la Tecnica delle Cinque Strisce, il Vento Burlone non mi fermerà! Verso la Valle Stellata!' },
+    ]
+  },
+  20: {
+    bg: 'linear-gradient(160deg,#1a237e,#283593,#3949ab)',
+    panels: [
+      { chars:'🐰🌠', items:'⭐🌙', deco:'⭐💫🌙✨⭐', speaker:'🐰 Fiocco', text:'La Valle Stellata! Le stelle cadono come gomitoli dal cielo... non ho mai visto niente di così bello!' },
+      { chars:'💨😤', items:'🌪️❄️', deco:'💨🌪️❄️💨🌪️', speaker:'💨 Vento Burlone', text:'Hahaha! Coniglietta stupida! Hai trovato solo la metà! La Montagna di Lana è mia, e non ti lascerò passare!' },
+      { chars:'🐰😤', items:'🧶🔥', deco:'⭐✊💪🌟⭐', speaker:'🐰 Fiocco', text:'Non ho paura di te, Vento Burlone! Ho i miei amici, la mia magia e tantissimi gomitoli colorati. Ci vediamo sulla montagna!' },
+    ]
+  },
+  25: {
+    bg: 'linear-gradient(160deg,#eceff1,#cfd8dc,#b0bec5)',
+    panels: [
+      { chars:'🐰🏔️', items:'❄️🧶', deco:'❄️⛄🌨️❄️⛄', speaker:'🐰 Fiocco', text:'La Montagna di Lana! Il vento è fortissimo qui... ma io sono più forte! Ogni passo mi avvicina alla cima.' },
+      { chars:'💨😡', items:'🌪️⚡', deco:'💨🌪️⛈️💨🌪️', speaker:'💨 Vento Burlone', text:'FERMATI! Questa è la mia montagna! Ho raccolto qui tutti i gomitoli più preziosi del bosco! Non li riavrai mai!' },
+      { chars:'🐰🌈', items:'🧶✨', deco:'🌈🎉⭐✨🎊', speaker:'🐰 Fiocco', text:'FORZA! Con tutti i gomitoli che ho recuperato, creo la SUPER MAGIA! Il Vento Burlone è sconfitto... per ora!' },
+    ]
+  },
+  50: {
+    bg: 'linear-gradient(160deg,#fff9c4,#fff59d,#fff176)',
+    panels: [
+      { chars:'🐰🎉', items:'🧶🏆', deco:'🎉🎊⭐🌟🎈', speaker:'🐰 Fiocco', text:'Metà viaggio completata! Ho recuperato 50 livelli di gomitoli. Il mio zaino è pieno di colori meravigliosi!' },
+      { chars:'🐰🧵', items:'🪡✨', deco:'🧶🎀🧵💫✨', speaker:'🐰 Fiocco', text:'Con questi fili potrei già creare qualcosa di speciale... ma non ancora. Devo recuperare TUTTI i gomitoli del bosco!' },
+    ]
+  },
+  100: {
+    bg: 'linear-gradient(160deg,#f9a825,#fbc02d,#ffd54f)',
+    panels: [
+      { chars:'🐰🏆', items:'🌈🧶', deco:'🎉🎊🎈🌈⭐', speaker:'🐰 Fiocco', text:'L\'HO FATTO! Ho recuperato TUTTI i gomitoli del Bosco Incantato! Il Vento Burlone è definitivamente sconfitto!' },
+      { chars:'💨😢', items:'💧🌪️', deco:'💨💧😢💨💧', speaker:'💨 Vento Burlone', text:'Noooo! Come hai fatto?! Avevi solo... ah, capisco. Avevi gli amici di tutto il bosco con te. Hai vinto tu, coniglietta.' },
+      { chars:'🐰😊', items:'🎀✨', deco:'🌈🌸🌟💫🎊', speaker:'🐰 Fiocco', text:'Finalmente posso tessere il mio capolavoro! Un grande arazzo colorato per tutto il bosco. Grazie per aver giocato con me! 🌈' },
+    ]
+  },
+};
+
+let cutsceneState = { levelId: null, panelIdx: 0, panels: [], onClose: null };
+
+function checkAndShowCutscene(levelId, onClose){
+  const cs = CUTSCENES[levelId];
+  if(!cs) return false;
+  const seen = JSON.parse(localStorage.getItem('fiocco_cutscenes')||'[]');
+  if(seen.includes(levelId)) return false;
+  seen.push(levelId);
+  localStorage.setItem('fiocco_cutscenes', JSON.stringify(seen));
+  showCutscene(cs, onClose);
+  return true;
+}
+
+function showCutscene(cs, onClose){
+  cutsceneState = { panelIdx: 0, panels: cs.panels, onClose: onClose||null };
+  const ov = document.getElementById('cutscene-overlay');
+  const bg = document.getElementById('cutscene-bg');
+  const content = document.getElementById('cutscene-content');
+  const dots = document.getElementById('cut-dots');
+
+  bg.style.background = cs.bg;
+  content.innerHTML = '';
+  dots.innerHTML = '';
+
+  cs.panels.forEach((p, i) => {
+    const panel = document.createElement('div');
+    panel.className = 'cutscene-panel' + (i===0?' active':'');
+    panel.dataset.idx = i;
+    const _deco=Array.from(p.deco).filter(c=>c.trim());
+    const _chars=Array.from(p.chars).filter(c=>c.trim());
+    const _items=Array.from(p.items||'').filter(c=>c.trim());
+    panel.innerHTML = `
+      <div class="cutscene-scene">
+        <div class="cut-bg-deco">${_deco.map(c=>`<span>${c}</span>`).join(' ')}</div>
+        <div class="cut-chars">
+          ${_chars.map((c,j)=>`<span class="${j===0?'bunny':'item'}" style="font-size:${j===0?'3.5':'2.8'}rem">${c}</span>`).join('')}
+          ${_items.length?`<span class="item" style="font-size:2.2rem;margin-left:8px">${_items[0]}</span>`:''}
+        </div>
+      </div>
+      <div class="cutscene-dialog">
+        <div class="cutscene-speaker">${p.speaker}</div>
+        <div class="cutscene-text">${p.text}</div>
+      </div>`;
+    content.appendChild(panel);
+    const dot = document.createElement('div');
+    dot.className = 'cut-dot'+(i===0?' active':'');
+    dots.appendChild(dot);
+  });
+
+  document.getElementById('btn-cut-next').textContent = cs.panels.length===1 ? 'Avanti →' : 'Avanti →';
+  ov.classList.add('active');
+}
+
+function cutsceneNext(){
+  const panels = document.querySelectorAll('.cutscene-panel');
+  const dots = document.querySelectorAll('.cut-dot');
+  panels[cutsceneState.panelIdx].classList.remove('active');
+  dots[cutsceneState.panelIdx].classList.remove('active');
+  cutsceneState.panelIdx++;
+  if(cutsceneState.panelIdx >= cutsceneState.panels.length){
+    closeCutscene();
+    return;
+  }
+  panels[cutsceneState.panelIdx].classList.add('active');
+  dots[cutsceneState.panelIdx].classList.add('active');
+  if(cutsceneState.panelIdx === cutsceneState.panels.length - 1){
+    document.getElementById('btn-cut-next').textContent = 'Continua! 🐰';
+  }
+}
+
+function closeCutscene(){
+  document.getElementById('cutscene-overlay').classList.remove('active');
+  const cb = cutsceneState.onClose;
+  cutsceneState = { panelIdx:0, panels:[], onClose:null };
+  if(cb) cb();
+}
 
 // ── LOADING SEQUENCE ──────────────────────────────────────────
 const LOADING_MESSAGES=[
